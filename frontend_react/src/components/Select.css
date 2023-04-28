@@ -1,0 +1,80 @@
+  .select {
+    background-color: white;
+    width: 300px;
+    border: 1.5px black;
+    padding-bottom: 5px;
+  }
+
+  .TextBox {
+    background: #f8f8f8;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
+    margin: 5px 0px;
+  }
+
+  .InputTextBox input{
+    width: 100%;
+    min-height: 50px;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border-color: black;
+    border-width: 1px;
+  }
+
+  .textarea{
+    font-family: "Helvetica";
+    resize: none;
+    padding: 5px;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 8px;
+  }
+
+  .CorrectWrong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .symbols {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+  }
+
+  #submit_button{
+    background-color: rgb(238, 238, 238);
+    border: 1px solid black;
+    margin: 5px 0;
+    height: 30px;
+  }
+  #submit_button:active{
+    background-color: rgb(231, 231, 231);
+  }
+  
+  .custom-file-upload{
+    display: inline-block;
+    background-color: #549edd;
+    width: 187px;
+    height: 25px;
+    border: 1.5px solid #717273;
+    border-radius: 8px;
+    padding: 5px;
+    font-size: 15px;
+    text-align: center;
+    line-height: 25px;
+  }
+
+  button {
+    background-color: #549edd;
+    width: 200px;
+    height: 40px;
+    border: 1.5px solid #717273;
+    border-radius: 8px;
+    padding: 5px;
+    font-size: 15px;
+    text-align: center;
+  }

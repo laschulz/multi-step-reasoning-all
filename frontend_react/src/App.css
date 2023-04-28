@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Neucha&display=swap');
+
+.App {
+  width: 95vw;
+  height: 100vh;
+  display: flex;
+  padding: 0 30px;
+  flex-direction: column;
+  background-color: white;
+  font-family: "Helvetica";
+}
+
+.App-header {
+  font-size: 40px;
+  font-weight: bold;
+  padding: 30px 50px 30px 20px;
+  margin-top:100px;
+  z-index: 1;
+  text-align: center;
+}
+
+@media (max-width: 2000px){
+  .App-header{
+    margin: 15px 0;
+    font-size: 35px;
+  }
+}
+
+.center {
+  text-align: center;
+}
+button {
+  background-color: #549edd;
+  width: 200px;
+  height: 40px;
+  border: 1.5px solid #717273;
+  border-radius: 8px;
+  padding: 5px;
+  font-size: 15px;
+  text-align: center;
+}
+button:active {
+  background-color: #549ddde8;
+}
+
+footer{
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  padding: 30px 0;
+  margin-top: auto;
+}
+
+#reset {
+  background-color: #D65A5A;
+}
+#reset:active {
+  background-color: #d65a5ae1;
+}
+
+#download-log {
+  background-color: white;
+  border: solid black;
+  margin: 5px 0;
+}
+#download-log {
+  background-color: rgba(255, 255, 255, 0.794);
+}
+
+wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}

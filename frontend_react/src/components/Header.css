@@ -1,0 +1,9 @@
+.FullWidth {
+    width: 100vw;
+    background: #ededed;
+}
+
+.BodyInside { 
+    font-size: 16px;
+    padding: 30px 30px 5px 30px;
+}
