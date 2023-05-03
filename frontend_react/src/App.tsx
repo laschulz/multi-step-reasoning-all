@@ -76,7 +76,7 @@ const handleRunModel = () => {
     console.log(typeof(data.output))
     console.log("data.output is: " + data.output);
     setbackendStuff({
-      output: data.output[0].translation_text
+      output: data.output
     });
   })
   .catch(error => {console.error(error); throw error});

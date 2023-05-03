@@ -66,19 +66,21 @@ function InputCSV(props: InputCSVComponentProp){
 }
 
 // input is a typed question by user input
-class OwnQuestion extends Component<{ questionAnswer: (q: string[], a: string[]) => void }, { question: string}> {
+class OwnQuestion extends Component<{ questionAnswer: (q: string[], a: string[]) => void }, {question: string, text: string}> {
   constructor(props: { questionAnswer: (q: string[]) => void }) {
     super(props);
-    this.state = { question: '' };
+    this.state = { question: '' ,text: "Submit"};
   }
 
   handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     this.props.questionAnswer([this.state.question], []);
+    this.setState({text: "Submitted"})
   }
 
   handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    this.setState({ question: event.target.value });
+    this.setState({ question: event.target.value});
+    
   };
 
   render() {
@@ -92,10 +94,11 @@ class OwnQuestion extends Component<{ questionAnswer: (q: string[], a: string[])
               onChange={this.handleInputChange}
               minRows={3} 
               style={{width:'100%', textAlign: 'left'}}
-              onResize={undefined} onResizeCapture={undefined}/>
-          <button id="submit_button" type="submit">Submit</button>
+              onResize={undefined}
+              onResizeCapture={undefined} />
+          <button id="submit_button" type="submit">{this.state.text}</button>
         </form>
-      </div>
+      </div> 
     );
   }
 }

@@ -8,7 +8,7 @@ from flask import jsonify
 from flask_cors import CORS
 
 from dummy_server.router.routes import add_routes
-from ..modules.inference import infer_t5
+from ..modules.inference import infer_t5, gpt_2
 
 
 API_URL = "https://api-inference.huggingface.co/models/t5-small"
@@ -26,11 +26,6 @@ def create_app():
 
     @app.route('/models', methods=['POST', 'GET'])
     def models():
-        model_options = { #probably won't need this
-            'Model1': 'model1_backend',
-            'Model2': 'model2_backend',
-            'Model3': 'model3_backend'
-        }
         requestedModel = request.json['model']
         requestedQuestion = request.json['questions']
 
@@ -39,29 +34,10 @@ def create_app():
         if (requestedModel=='model1'):
             output = infer_t5(requestedQuestion) 
         elif (requestedModel=='model2'):
-            output = ['requested model: Model2 ']
-        elif (requestedModel=='model3'):
-            output = ['requested model: Model3 ']
-        #end of dummy stuff
-
-        return jsonify({'output': output})
-    
-    def models2():
-        model_options = { #probably won't need this
-            'Model1': 'model1_backend',
-            'Model2': 'model2_backend',
-            'Model3': 'model3_backend'
-        }
-        requestedModel = request.json['model']
-        requestedQuestion = request.json['question']
-        print(requestedQuestion)
-
-        #dummy stuff for the moment, connect to hugging face here later
-        output = ['this is a working dummy_string']
-        if (requestedModel=='model1'):
-            output = infer_t5(requestedQuestion) 
-        elif (requestedModel=='model2'):
-            output = ['requested model: Model2 ']
+            output = gpt_2({"inputs": requestedQuestion, 
+                            "parameters": {"max_new_tokens": 100},
+                            "options": {"wait_for_model": True}
+                            })
         elif (requestedModel=='model3'):
             output = ['requested model: Model3 ']
         #end of dummy stuff

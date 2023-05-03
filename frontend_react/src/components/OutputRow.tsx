@@ -53,7 +53,7 @@ function OutputRowComponent(props: OutputComponentProp) {
         <div style={{ fontWeight: 'bold' }}>
             {'Answer ' + props.question_index + ': \n'}
         </div>
-        <p>{props.backendResponse}</p>
+        <div style={{whiteSpace: "pre-line"}}>{props.backendResponse}</div>
       </div>
       <div className="CorrectWrong">
         <div className="symbols">

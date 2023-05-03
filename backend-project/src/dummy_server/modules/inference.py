@@ -2,34 +2,36 @@ import json
 import requests
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
-model_name = "t5-small"
-
-API_URL = "https://api-inference.huggingface.co/models/" + model_name
-API_TOKEN = "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"
+API_URL = "https://api-inference.huggingface.co/models/"
+API_TOKEN = "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" #might come from the backend
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
-tokenizer = T5Tokenizer.from_pretrained(model_name)
-model = T5ForConditionalGeneration.from_pretrained(model_name)
-
-def infer_t5(input):
-    response = requests.post(API_URL, headers=headers, json=input, params={"wait_for_model": True})
+def infer_t5(input_array):
+    response = requests.post(get_URL("t5-small"), headers=headers, json=input_array, params={"wait_for_model": True})
     response_json = response.json()
-    return response_json
+    print(response_json)
+    response_json2 = list(map(lambda o: o['translation_text'], response_json))
+    return response_json2
 
-def infer_t5_3(input_array):
-    data = tokenizer([input for input in input_array], return_tensors="pt", padding=True)
-    response = requests.post(API_URL, headers=headers, data=data, params={"wait_for_model": True})
-    outputs = json.loads(response.content.decode("utf-8"))
-    return outputs
-
+#not using this right now
+tokenizer = T5Tokenizer.from_pretrained("t5-small")
+model = T5ForConditionalGeneration.from_pretrained("t5-small")
 def infer_t5_2(input_array): #this works but not with the server of hugging face
-
     inputs = tokenizer([input for input in input_array], return_tensors="pt", padding=True)
-
     output_sequence = model.generate(
         input_ids=inputs["input_ids"],
         attention_mask=inputs["attention_mask"],
         do_sample=False,  # disable sampling to test if batching affects output
     )
-
     return tokenizer.batch_decode(output_sequence, skip_special_tokens=True)
+#end
+
+def gpt_2(input_array):
+    response = requests.post(get_URL("gpt2-large"), headers=headers, json=input_array)
+    response_json = response.json()[0]
+    print(response_json)
+    response_json2 = list(map(lambda o: o['generated_text'], response_json))
+    return response_json2
+
+def get_URL(model_name):
+    return API_URL + model_name

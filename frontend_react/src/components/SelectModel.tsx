@@ -3,7 +3,7 @@ import Select from 'react-select';
 
 const options= [
   {value: 'model1', label: 'FLAN-T5'},
-  {value: 'model2', label: 'Model2'},
+  {value: 'model2', label: 'GPT-2'},
   {value: 'model3', label: 'Model3'}
 ]
 
