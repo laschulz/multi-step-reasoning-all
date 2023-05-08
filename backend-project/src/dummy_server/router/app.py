@@ -32,7 +32,9 @@ def create_app():
         #dummy stuff for the moment, connect to hugging face here later
         output = ['this is a working dummy_string']
         if (requestedModel=='model1'):
-            output = infer_t5(requestedQuestion) 
+            output = infer_t5({"inputs": requestedQuestion, 
+                            "options": {"wait_for_model": True}
+                            })
         elif (requestedModel=='model2'):
             output = gpt_2({"inputs": requestedQuestion, 
                             "parameters": {"max_new_tokens": 100},

@@ -4,6 +4,7 @@ import SelectModelComponent from './components/SelectModel';
 import HeaderComponent from './components/Header';
 import SelectQuestionComponent from './components/SelectQuestion';
 import OutputComponent from './components/Output';
+import LoadingSpinner from './components/LoadingSpinner'
 
 const backend = "http://127.0.0.1:8000/models"
 
@@ -17,6 +18,7 @@ function App() {
   const [backendStuff, setbackendStuff] = useState({ //using this for the backend connection, maybe can simplify this later
     output: []
 });
+  const [isLoading, setIsLoading] = useState(false);
 
 //all handle functions (sorted alphabetically)
 const handleDownload = () => {
@@ -56,6 +58,7 @@ const handleRefresh = () => {
 
 //communicate with API
 const handleRunModel = () => {
+  setIsLoading(true);
   fetch(backend, {
   method: 'POST',
   headers: {
@@ -72,6 +75,7 @@ const handleRunModel = () => {
     }
     return response.json();})
   .then(data => {
+    setIsLoading(false);
     console.log(data);
     console.log(typeof(data.output))
     console.log("data.output is: " + data.output);
@@ -84,36 +88,50 @@ const handleRunModel = () => {
   setShowDiv(true);
 };
 
+const renderUser = (
+  <div>
+    <OutputComponent outputResult={handleOutput} numberQuestions={questions.length} backendResponse={backendStuff.output} expectedAnswer={expectedAnswer}/><br/>
+
+    <h2>5. Download as .csv File</h2>
+    <div className='center'>
+      <button onClick={handleDownload}>Download</button>
+    </div>
+  </div>
+)
+
+
   return (
     <div className='wrapper'>
       <HeaderComponent/>
       <header className="App-header"> Multi-step Reasoning Interface </header>
       <div className='App'>
-        <div style={{textAlign: 'right'}}>
-          <button id="download-log">Download all Interactions</button><br/>
-          <button id="reset" onClick={handleRefresh}>Reset</button>
-        </div>
-
-        <SelectModelComponent selectModel={handleModel}/><br/>
-        
-        <SelectQuestionComponent questionAnswer={handleQuestion}/><br/>
-
-        <h2>3. Run Model</h2>
-        <div className='center'>
-          <button disabled={!model || !questions} onClick={handleRunModel}>Run Model</button>
-        </div><br/>
-
-        {showDiv ? (
-          <div>
-            <OutputComponent outputResult={handleOutput} numberQuestions={questions.length} backendResponse={backendStuff.output} expectedAnswer={expectedAnswer}/><br/>
-
-            <h2>5. Download as .csv File</h2>
-            <div className='center'>
-              <button onClick={handleDownload}>Download</button>
-            </div>
+          <div style={{textAlign: 'right'}}>
+            <button id="download-log">Download all Interactions</button><br/>
+            <button id="reset" onClick={handleRefresh}>Reset</button>
           </div>
-        ) : null}
 
+          <SelectModelComponent selectModel={handleModel}/><br/>
+          
+          <SelectQuestionComponent questionAnswer={handleQuestion}/><br/>
+
+          <h2>3. Run Model</h2>
+          <div className='center'>
+            <button disabled={!model || !questions} onClick={handleRunModel}>Run Model</button>
+          </div><br/>
+          
+        {isLoading ? <LoadingSpinner/> :
+          (<div>
+            {showDiv ? (
+            <div>
+              <OutputComponent outputResult={handleOutput} numberQuestions={questions.length} backendResponse={backendStuff.output} expectedAnswer={expectedAnswer}/><br/>
+
+              <h2>5. Download as .csv File</h2>
+              <div className='center'>
+                <button onClick={handleDownload}>Download</button>
+              </div>
+            </div>
+          ) : null}
+          </div>)}
         
       </div>
     </div>
