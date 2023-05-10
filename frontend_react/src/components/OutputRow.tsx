@@ -13,8 +13,9 @@ const error_classes = [
 ];
 
 type OutputComponentProp = {
-  outputResult: (outputValue: string[], key: string) => void,
+  outputResult: (outputValue: string[], key: string, question_index: string, subquestion: string) => void,
   question_index: number, 
+  subquestion_index: number
   backendResponse: string,
   expectedAnswer: string //not doing anything so far with this
 }
@@ -28,13 +29,13 @@ function OutputRowComponent(props: OutputComponentProp) {
   const handleWrongClick = () => {
     setTransCorrect(transCorrect === 1 ? transCorrect ^ 1: 0); 
     setTransWrong(1); //wrong symbol has full opacity
-    props.outputResult(["false", ""], (props.question_index-1).toString());
+    props.outputResult(["false", ""], (props.subquestion_index-1).toString(), (props.question_index-1).toString(), props.backendResponse);
   };
 
   const handleCorrectClick = () => {
     setTransWrong(transWrong === 1 ? transWrong ^ 1: 0); 
     setTransCorrect(1); //correct symbol has full opacity
-    props.outputResult(["true", ""], (props.question_index-1).toString());
+    props.outputResult(["true", ""], (props.subquestion_index-1).toString(), (props.question_index-1).toString(), props.backendResponse);
   };
 
   const handleSelectChange = (selectedOption: any) => {
@@ -44,7 +45,7 @@ function OutputRowComponent(props: OutputComponentProp) {
     } else {
       setSpecifyError(false);
     }
-    props.outputResult(["false", selectedOption.label], (props.question_index-1).toString()) //returning the output to the parent
+    props.outputResult(["false", selectedOption.label], (props.subquestion_index-1).toString(), (props.question_index-1).toString(), props.backendResponse) //returning the output to the parent
   };
 
   return (

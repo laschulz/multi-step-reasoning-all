@@ -16,13 +16,13 @@ function App() {
   const [questions, setQuestions] = useState<string[]>([]); //stores the selected questions
   const [expectedAnswer, setExpectedAnswer] = useState<string[]>([]);
   const [backendStuff, setbackendStuff] = useState({ //using this for the backend connection, maybe can simplify this later
-    output: []
+    output: [[]]
 });
   const [isLoading, setIsLoading] = useState(false);
 
 //all handle functions (sorted alphabetically)
 const handleDownload = () => {
-  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Question", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + csvRows.map(row => row.join(",")).join("\r\n");
+  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + csvRows.map(row => row.join(",")).join("\r\n");
   const encodedUri = encodeURI(csvContent);
   var link = document.createElement("a");
   link.setAttribute("href", encodedUri);
@@ -45,9 +45,12 @@ const handleOutput = (outputValue: string[][]) => {
         continue;
       }
     }
-    const rowArray = outputValue[i];
-    const index = rowArray[0]
-    const row = [index, questions[parseInt(index)], ...rowArray.slice(1)];
+    var rowArray = outputValue[i];
+    console.log("rowArray is: " + rowArray)
+    var q_index = rowArray[1]
+    var q = questions[parseInt(q_index)].replace(/,/g, "");
+    var subquestion = rowArray[2].replace(/,/g, "");
+    var row = [rowArray[0], q, subquestion, ...rowArray.slice(3)];
     console.log("row is: "+ i);
     csvRows.push(row)
   }
@@ -76,17 +79,23 @@ const handleRunModel = () => {
     return response.json();})
   .then(data => {
     setIsLoading(false);
-    console.log(data);
-    console.log(typeof(data.output))
     console.log("data.output is: " + data.output);
     setbackendStuff({
-      output: data.output
+      output: splitOutput(data.output)
     });
   })
   .catch(error => {console.error(error); throw error});
     
   setShowDiv(true);
 };
+
+function splitOutput (arr: string[]){
+  var o = Array(arr.length);
+  for (let i=0; i < arr.length; i++){
+    o[i] = arr[i].split('?');
+  }
+  return o;
+}
 
   return (
     <div className='wrapper'>
