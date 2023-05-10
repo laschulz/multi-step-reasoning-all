@@ -8,7 +8,7 @@ from flask import jsonify
 from flask_cors import CORS
 
 from dummy_server.router.routes import add_routes
-from ..modules.inference import infer_t5, gpt_2
+from ..modules.inference import infer_t5, infer_t5_local, gpt_2
 
 
 API_URL = "https://api-inference.huggingface.co/models/t5-small"
@@ -36,12 +36,14 @@ def create_app():
                             "options": {"wait_for_model": True}
                             })
         elif (requestedModel=='model2'):
+            output = infer_t5_local({"inputs": requestedQuestion,  
+                            "options": {"wait_for_model": True}
+                            })
+        elif (requestedModel=='model3'):
             output = gpt_2({"inputs": requestedQuestion, 
                             "parameters": {"max_new_tokens": 100},
                             "options": {"wait_for_model": True}
                             })
-        elif (requestedModel=='model3'):
-            output = ['requested model: Model3 ']
         #end of dummy stuff
 
         return jsonify({'output': output})

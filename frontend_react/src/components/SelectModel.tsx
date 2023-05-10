@@ -3,8 +3,8 @@ import Select from 'react-select';
 
 const options= [
   {value: 'model1', label: 'FLAN-T5'},
-  {value: 'model2', label: 'GPT-2'},
-  {value: 'model3', label: 'Model3'}
+  {value: 'model2', label: 'T5-large (local)'},
+  {value: 'model3', label: 'GPT-2'}
 ]
 
 const model1_text = "model 1 text ajskldfjsdkflsjf"

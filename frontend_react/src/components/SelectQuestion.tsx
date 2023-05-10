@@ -5,15 +5,15 @@ import { Component, useState } from 'react';
 import Papa from 'papaparse';
 
 const options= [
-    {value: 'question1', label: 'Question1'},
-    {value: 'question2', label: 'Question2'},
+    {value: 'question1', label: 'Example Question: Tina\'s Salary'},
+    {value: 'question2', label: 'Example Question: Cars in Parking Lot'},
     {value: 'question3', label: 'Question3'},
     {value: 'write_own', label: 'Write your own question'},
     {value: 'csv', label: 'Upload .csv File'},
   ]
 
-const question1_text = "Solve this problem in step by step manner. Tina makes $18.00 an hour. If she works more than 8 hours per shift, she is eligible for overtime, which is paid by your hourly wage + 1/2 your hourly wage. If she works 10 hours every day for 5 days, how much money does she make?";
-const question2_text = "this is the text for question 2";
+const question1_text = "Solve this problem in step by step manner: Tina makes $18.00 an hour. If she works more than 8 hours per shift, she is eligible for overtime, which is paid by your hourly wage + 1/2 your hourly wage. If she works 10 hours every day for 5 days, how much money does she make?";
+const question2_text = "Solve this problem in step by step manner: If there are 3 cars in the parking lot and 2 more cars arrive, how many cars are in the parking lot?";
 const question3_text = "this is the text for question 3";
  
 // input is a predefined example question

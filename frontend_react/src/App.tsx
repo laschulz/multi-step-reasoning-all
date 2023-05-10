@@ -88,18 +88,6 @@ const handleRunModel = () => {
   setShowDiv(true);
 };
 
-const renderUser = (
-  <div>
-    <OutputComponent outputResult={handleOutput} numberQuestions={questions.length} backendResponse={backendStuff.output} expectedAnswer={expectedAnswer}/><br/>
-
-    <h2>5. Download as .csv File</h2>
-    <div className='center'>
-      <button onClick={handleDownload}>Download</button>
-    </div>
-  </div>
-)
-
-
   return (
     <div className='wrapper'>
       <HeaderComponent/>
@@ -115,6 +103,7 @@ const renderUser = (
           <SelectQuestionComponent questionAnswer={handleQuestion}/><br/>
 
           <h2>3. Run Model</h2>
+          <div className='TextBox'><p>{"Please note that the first run of a model can take longer as the model has to be loaded first. If you don\'t receive an answer, click \"Run Model\" again."}</p></div>
           <div className='center'>
             <button disabled={!model || !questions} onClick={handleRunModel}>Run Model</button>
           </div><br/>
@@ -123,7 +112,7 @@ const renderUser = (
           (<div>
             {showDiv ? (
             <div>
-              <OutputComponent outputResult={handleOutput} numberQuestions={questions.length} backendResponse={backendStuff.output} expectedAnswer={expectedAnswer}/><br/>
+              <OutputComponent outputResult={handleOutput} numberQuestions={questions.length > 1 ? questions.length-1 : questions.length} backendResponse={questions.length > 1 ? backendStuff.output.slice(1) : backendStuff.output} expectedAnswer={expectedAnswer}/><br/>
 
               <h2>5. Download as .csv File</h2>
               <div className='center'>

@@ -13,10 +13,10 @@ def infer_t5(input_array):
     response_json2 = list(map(lambda o: o['generated_text'], response_json))
     return response_json2
 
-"""not using this right now
-tokenizer = T5Tokenizer.from_pretrained("t5-large")
-model = T5ForConditionalGeneration.from_pretrained("t5-large")
-def infer_t5_2(input_array): #this works but not with the server of hugging face
+#running T5 locally -> kinda shit
+def infer_t5_local(input_array): 
+    tokenizer = T5Tokenizer.from_pretrained("laschulz/t5-large")
+    model = T5ForConditionalGeneration.from_pretrained("laschulz/t5-large")
     inputs = tokenizer([input for input in input_array], return_tensors="pt", padding=True)
     output_sequence = model.generate(
         input_ids=inputs["input_ids"],
@@ -24,7 +24,7 @@ def infer_t5_2(input_array): #this works but not with the server of hugging face
         do_sample=False,  # disable sampling to test if batching affects output
     )
     return tokenizer.batch_decode(output_sequence, skip_special_tokens=True)
-#end """
+#end 
 
 def gpt_2(input_array):
     response = requests.post(get_URL("gpt2-large"), headers=headers, json=input_array)
