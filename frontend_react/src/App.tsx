@@ -22,7 +22,7 @@ function App() {
 
 //all handle functions (sorted alphabetically)
 const handleDownload = () => {
-  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + csvRows.map(row => row.join(",")).join("\r\n");
+  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + csvRows.map(row => row.join(",")).join("\r\n");
   const encodedUri = encodeURI(csvContent);
   var link = document.createElement("a");
   link.setAttribute("href", encodedUri);
@@ -48,9 +48,9 @@ const handleOutput = (outputValue: string[][]) => {
     var rowArray = outputValue[i];
     console.log("rowArray is: " + rowArray)
     var q_index = rowArray[1]
-    var q = questions[parseInt(q_index)].replace(/,/g, "");
+    var q = questions[parseInt(q_index)].replace(/,/g, ""); //replace the commas because otherwise csv parsing gets messed up
     var subquestion = rowArray[2].replace(/,/g, "");
-    var row = [rowArray[0], q, subquestion, ...rowArray.slice(3)];
+    var row = [rowArray[0], model, q, subquestion, ...rowArray.slice(3)];
     console.log("row is: "+ i);
     csvRows.push(row)
   }
@@ -83,6 +83,7 @@ const handleRunModel = () => {
     setbackendStuff({
       output: splitOutput(data.output)
     });
+    console.log(typeof(backendStuff))
   })
   .catch(error => {console.error(error); throw error});
     
@@ -92,7 +93,11 @@ const handleRunModel = () => {
 function splitOutput (arr: string[]){
   var o = Array(arr.length);
   for (let i=0; i < arr.length; i++){
-    o[i] = arr[i].split('?');
+    if (o[i] === ''){
+      o[i] = ["empty"] //maybe not needed
+    }else{
+      o[i] = arr[i].split('?');
+    }
   }
   return o;
 }
@@ -121,7 +126,15 @@ function splitOutput (arr: string[]){
           (<div>
             {showDiv ? (
             <div>
-              <OutputComponent outputResult={handleOutput} numberQuestions={questions.length > 1 ? questions.length-1 : questions.length} backendResponse={questions.length > 1 ? backendStuff.output.slice(1) : backendStuff.output} expectedAnswer={expectedAnswer}/><br/>
+              {/* have to do the distinction of the length of the questions array because if it's a csv file, the first row is always empty due to 
+              the fact that it's the header row */}
+              <OutputComponent 
+                outputResult={handleOutput} 
+                numberQuestions={questions.length > 1 ? questions.length-1 : questions.length} 
+                backendResponse={questions.length > 1 ? backendStuff.output.slice(1) : backendStuff.output} 
+                expectedAnswer={expectedAnswer} 
+                questions_asked={questions.length > 1 ? questions.slice(1) : questions}
+              /><br/>
 
               <h2>5. Download as .csv File</h2>
               <div className='center'>

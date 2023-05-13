@@ -1,4 +1,5 @@
 import json
+import time
 import requests
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
@@ -11,6 +12,22 @@ def infer_t5(input_array):
     response_json = response.json()
     print(response_json)
     response_json2 = list(map(lambda o: o['generated_text'], response_json))
+    return response_json2
+
+def infer_t5(input_array):
+    retries_left = 3
+    while retries_left > 0:
+        response = requests.post(get_URL("laschulz/t5-large"), headers=headers, json=input_array)
+        response_json = response.json()
+        print(response_json)
+        if 'error' in response_json and response_json['error'] == 'Model laschulz/t5-large time out':
+            retries_left = retries_left-1
+            time.sleep(10) # wait for 10 seconds before retrying
+            continue
+        else:
+            break
+    response_json2 = list(map(lambda o: o['generated_text'], response_json))
+    print("here")
     return response_json2
 
 #running T5 locally -> kinda shit

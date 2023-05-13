@@ -12,8 +12,8 @@ const options= [
     {value: 'csv', label: 'Upload .csv File'},
   ]
 
-const question1_text = "Solve this problem in step by step manner: Tina makes $18.00 an hour. If she works more than 8 hours per shift, she is eligible for overtime, which is paid by your hourly wage + 1/2 your hourly wage. If she works 10 hours every day for 5 days, how much money does she make?";
-const question2_text = "Solve this problem in step by step manner: If there are 3 cars in the parking lot and 2 more cars arrive, how many cars are in the parking lot?";
+const question1_text = "Tina makes $18.00 an hour. If she works more than 8 hours per shift, she is eligible for overtime, which is paid by your hourly wage + 1/2 your hourly wage. If she works 10 hours every day for 5 days, how much money does she make?";
+const question2_text = "If there are 3 cars in the parking lot and 2 more cars arrive, how many cars are in the parking lot?";
 const question3_text = "this is the text for question 3";
  
 // input is a predefined example question

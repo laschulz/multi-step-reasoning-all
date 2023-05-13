@@ -29,23 +29,21 @@ def create_app():
         requestedModel = request.json['model']
         requestedQuestion = request.json['questions']
 
-        #dummy stuff for the moment, connect to hugging face here later
-        output = ['this is a working dummy_string']
+        output = ['']
         if (requestedModel=='model1'):
             output = infer_t5({"inputs": requestedQuestion, 
                             "options": {"wait_for_model": True}
                             })
+            print(output)
         elif (requestedModel=='model2'):
-            output = infer_t5_local({"inputs": requestedQuestion,  
-                            "options": {"wait_for_model": True}
-                            })
+            output = infer_t5_local(requestedQuestion)
+            print(output)
         elif (requestedModel=='model3'):
             output = gpt_2({"inputs": requestedQuestion, 
                             "parameters": {"max_new_tokens": 100},
                             "options": {"wait_for_model": True}
                             })
-        #end of dummy stuff
-
+        
         return jsonify({'output': output})
     
     return app

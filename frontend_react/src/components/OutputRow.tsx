@@ -6,9 +6,11 @@ import correct from '../correct_symbol.png';
 import wrong from '../wrong_symbol.png';
 
 const error_classes = [
-  { value: 'error1', label: 'Error 1' },
-  { value: 'error2', label: 'Error 2' },
-  { value: 'error3', label: 'Error 3' },
+  { value: 'wrong_order', label: 'Wrong order' }, //what should the right order be (maybe just provide the numbers?)
+  { value: 'wrong_question', label: 'Wrong question asked' },  //provide the question that should have been asked and instead
+  { value: 'unnecessary_question', label: 'Question asked is unnecessary' }, 
+  { value: 'question_missing', label: 'Question missing' },
+  { value: 'incomplete_question', label: 'Question is incomplete' },
   { value: 'other_error', label: 'Another Error (please specify)' },
 ];
 
@@ -17,7 +19,8 @@ type OutputComponentProp = {
   question_index: number, 
   subquestion_index: number
   backendResponse: string,
-  expectedAnswer: string //not doing anything so far with this
+  expectedAnswer: string, //not doing anything so far with this
+  question_asked: string
 }
 
 function OutputRowComponent(props: OutputComponentProp) {
@@ -40,11 +43,12 @@ function OutputRowComponent(props: OutputComponentProp) {
 
   const handleSelectChange = (selectedOption: any) => {
     setSelectedOption(selectedOption);
-    if (selectedOption.value === 'other_error'){
+    setSpecifyError(true)
+    /*if (selectedOption.value === 'other_error'){
       setSpecifyError(true);
     } else {
       setSpecifyError(false);
-    }
+    }*/
     props.outputResult(["false", selectedOption.label], (props.subquestion_index-1).toString(), (props.question_index-1).toString(), props.backendResponse) //returning the output to the parent
   };
 
@@ -52,9 +56,12 @@ function OutputRowComponent(props: OutputComponentProp) {
     <div>
       <div className="TextBox">
         <div style={{ fontWeight: 'bold' }}>
-            {'Answer ' + props.question_index + ': \n'}
+            {'Answer to question ' + props.question_index + ':'}<br/>
         </div>
-        <div style={{whiteSpace: "pre-line"}}>{props.backendResponse}</div>
+        <div style={{whiteSpace: "pre-line"}}>
+          {props.question_asked}<br/><br/>
+          {props.backendResponse + "?"}
+        </div>
       </div>
       <div className="CorrectWrong">
         <div className="symbols">
@@ -73,15 +80,16 @@ function OutputRowComponent(props: OutputComponentProp) {
 export default OutputRowComponent;
 
 //if the user wants to specify a new error class
-class SpecifyErrorText extends React.Component<{}, { error: string}> {
+class SpecifyErrorText extends React.Component<{}, { error: string, text: string}> {
   constructor(props: {}) {
     super(props);
-    this.state = { error: '' };
+    this.state = { error: '' , text: "Submit"};
   }
 
   handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log(this.state.error);
+    this.setState({text: "Submitted"})
   }
 
   handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -94,13 +102,13 @@ class SpecifyErrorText extends React.Component<{}, { error: string}> {
         <form onSubmit={this.handleSubmit} style={{textAlign: 'center'}}>
           <TextareaAutosize 
               className='textarea'
-              placeholder="Write your own multi-step reasoning question..."
+              placeholder="Please specify the error"
               value={this.state.error}
               onChange={this.handleInputChange}
               minRows={3} 
               style={{width:'400px', marginLeft: '5px'}}
               onResize={undefined} onResizeCapture={undefined}/><br/>
-          <button id="submit_button" type="submit">Submit</button>
+          <button id="submit_button" type="submit">{this.state.text}</button>
         </form>
       </div>
     );
