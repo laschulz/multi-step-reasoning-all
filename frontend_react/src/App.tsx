@@ -47,11 +47,10 @@ const handleOutput = (outputValue: string[][]) => {
       }
     }
     var rowArray = outputValue[i];
-    console.log("rowArray is: " + rowArray);
 
     //Structure of rowArray: question_index, subquestion_index, true/false, error type, additional comments
     var q_index = rowArray[0];
-    
+
     var q; //in general replace the commas because otherwise csv parsing gets messed up
     if (questions.length > 1){
       q = questions[parseInt(q_index)+1].replace(/,/g, ""); 
@@ -64,7 +63,6 @@ const handleOutput = (outputValue: string[][]) => {
     var row = [counter.toString(), model, q, subquestion, ...rowArray.slice(3)];
     counter++;
 
-    console.log("row is: "+ i);
     csvRows.push(row)
   }
 }
@@ -96,7 +94,6 @@ const handleRunModel = () => {
     setbackendStuff({
       output: splitOutput(data.output)
     });
-    console.log(typeof(backendStuff))
   })
   .catch(error => {console.error(error); throw error});
     

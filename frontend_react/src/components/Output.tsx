@@ -26,7 +26,6 @@ function OutputComponent(props: OutputComponentProp){
     });
     props.outputResult(updatedOutput);
     setOutputResult(updatedOutput);
-    console.log("outputResult: " + outputResult);
   }
 
   const rows = [];  
