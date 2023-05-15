@@ -35,7 +35,7 @@ def create_app():
                             "options": {"wait_for_model": True}
                             })
             print(output)
-        elif (requestedModel=='model2'):
+        elif (requestedModel=='T5-large'):
             output = infer_t5_local(requestedQuestion)
             print(output)
         elif (requestedModel=='model3'):

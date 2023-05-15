@@ -14,8 +14,8 @@ function OutputComponent(props: OutputComponentProp){
   
   const [outputResult, setOutputResult] = useState<string[][]>([]);
 
-  const handleRowOutput = (outputValue: string[], key: [number, number], question_index: string, subquestion: string) => {
-    var updatedOutput = [...outputResult, [key[0].toString()].concat(key[1].toString(), subquestion, outputValue)];
+  const handleRowOutput = (outputValue: string[], key: [number, number], subquestion: string, errorText: string) => {
+    var updatedOutput = [...outputResult, [key[0].toString()].concat(key[1].toString(), subquestion, outputValue, errorText)];
     
     //have to sort because it happens sometimes that the questions are unsorted
     updatedOutput.sort((a, b) => {

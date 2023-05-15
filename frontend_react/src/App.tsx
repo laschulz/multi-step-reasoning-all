@@ -37,7 +37,7 @@ const handleQuestion = (questionValue: string[], expectedAnswer: string[]) => {
   setQuestions(questionValue);
   setExpectedAnswer(expectedAnswer);
 }
-const handleOutput = (outputValue: string[][]) => { //issue is here
+const handleOutput = (outputValue: string[][]) => {
   csvRows = [];
   var counter = 0;
   for (let i = 0; i < outputValue.length; i++) {
@@ -51,7 +51,13 @@ const handleOutput = (outputValue: string[][]) => { //issue is here
 
     //Structure of rowArray: question_index, subquestion_index, true/false, error type, additional comments
     var q_index = rowArray[0];
-    var q = questions[parseInt(q_index)+1].replace(/,/g, ""); //replace the commas because otherwise csv parsing gets messed up
+    
+    var q; //in general replace the commas because otherwise csv parsing gets messed up
+    if (questions.length > 1){
+      q = questions[parseInt(q_index)+1].replace(/,/g, ""); 
+    }else{
+      q = questions[parseInt(q_index)].replace(/,/g, ""); 
+    } 
     var subquestion = rowArray[2].replace(/,/g, "");
 
     //Structure of output: unique index, model, input question, generated subquestion, true/false, error type, additional comments
@@ -139,7 +145,7 @@ function splitOutput (arr: string[]){
                 outputResult={handleOutput} 
                 numberQuestions={questions.length > 1 ? questions.length-1 : questions.length} 
                 backendResponse={questions.length > 1 ? backendStuff.output.slice(1) : backendStuff.output} 
-                expectedAnswer={expectedAnswer} 
+                expectedAnswer={questions.length > 1 ? expectedAnswer.slice(1): expectedAnswer} 
                 questions_asked={questions.length > 1 ? questions.slice(1) : questions}
               /><br/>
 

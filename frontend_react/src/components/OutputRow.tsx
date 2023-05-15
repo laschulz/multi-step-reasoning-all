@@ -7,7 +7,8 @@ import wrong from '../wrong_symbol.png';
 
 const error_classes = [
   { value: 'wrong_order', label: 'Wrong order' }, 
-  { value: 'wrong_question', label: 'Wrong question: Asks for information already specified in the text' },
+  { value: 'wrong_question', label: 'Wrong question' }, 
+  { value: 'information_given', label: 'Wrong question: Asks for information already specified in the text' },
   { value: 'unnecessary_question', label: 'Wrong question: Doesn\'t relate to the main question' }, 
   { value: 'question_missing', label: 'Question missing' },
   { value: 'incomplete_question', label: 'Question is incomplete' },
@@ -15,11 +16,11 @@ const error_classes = [
 ];
 
 type OutputComponentProp = {
-  outputResult: (outputValue: string[], key: [number, number], question_index: string, subquestion: string) => void,
+  outputResult: (outputValue: string[], key: [number, number], subquestion: string, errorText: string) => void,
   question_index: number, 
   subquestion_index: number
   backendResponse: string,
-  expectedAnswer: string, //not doing anything so far with this
+  expectedAnswer: string,
   question_asked: string
 }
 
@@ -32,13 +33,13 @@ function OutputRowComponent(props: OutputComponentProp) {
   const handleWrongClick = () => {
     setTransCorrect(transCorrect === 1 ? transCorrect ^ 1: 0); 
     setTransWrong(1); //wrong symbol has full opacity
-    props.outputResult(["false", ""], [(props.question_index-1), (props.subquestion_index-1)], "random string", props.backendResponse);
+    props.outputResult(["false", ""], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, "");
   };
 
   const handleCorrectClick = () => {
     setTransWrong(transWrong === 1 ? transWrong ^ 1: 0); 
     setTransCorrect(1); //correct symbol has full opacity
-    props.outputResult(["true", ""], [(props.question_index-1), (props.subquestion_index-1)], "random string", props.backendResponse);
+    props.outputResult(["true", ""], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, "");
   };
 
   const handleSelectChange = (selectedOption: any) => {
@@ -49,8 +50,12 @@ function OutputRowComponent(props: OutputComponentProp) {
     } else {
       setSpecifyError(false);
     }*/
-    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], "random string", props.backendResponse) //returning the output to the parent
+    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, "") 
   };
+
+  const handleSpecificError = (error: string, selectedOption: any) => {
+    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, error)
+  }
 
   return (
     <div>
@@ -63,6 +68,15 @@ function OutputRowComponent(props: OutputComponentProp) {
           {props.backendResponse + "?"}
         </div>
       </div>
+      {props.expectedAnswer != "" ?  (
+        <div className="TextBox">
+          <div style={{whiteSpace: "pre-line"}}>
+            {'Expected answer:\n ' + props.expectedAnswer}
+          </div>
+        </div>
+      ): null
+      }
+      
       <div className="CorrectWrong">
         <div className="symbols">
             <img src={correct} alt="Correct Symbol" style={{width: '50px', opacity: transCorrect === 1 ? 1 : 0.5}} onClick={handleCorrectClick} />
@@ -71,7 +85,7 @@ function OutputRowComponent(props: OutputComponentProp) {
         {transCorrect===0 && (
           <Select className="select" options={error_classes} value={selectedOption} onChange={handleSelectChange} />
         )}
-        {specifyError && <SpecifyErrorText />}
+        {specifyError && <SpecifyErrorText specificError={handleSpecificError} selectedoption={selectedOption}/>}
       </div>
     </div>
   );
@@ -79,17 +93,22 @@ function OutputRowComponent(props: OutputComponentProp) {
 
 export default OutputRowComponent;
 
-//if the user wants to specify a new error class
-class SpecifyErrorText extends React.Component<{}, { error: string, text: string}> {
-  constructor(props: {}) {
+//if the user wants to specify the error
+type SpecifyErrorTextProps = {
+  specificError: (error: string, selectedOption: any) => void;
+  selectedoption: any;
+}
+
+class SpecifyErrorText extends React.Component<SpecifyErrorTextProps, {error: string, text: string}> {
+  constructor(props: SpecifyErrorTextProps) {
     super(props);
     this.state = { error: '' , text: "Submit"};
   }
 
   handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(this.state.error);
-    this.setState({text: "Submitted"})
+    this.setState({text: "Submitted"});
+    this.props.specificError(this.state.error, this.props.selectedoption);
   }
 
   handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
