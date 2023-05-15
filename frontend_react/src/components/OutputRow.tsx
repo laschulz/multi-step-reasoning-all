@@ -6,16 +6,16 @@ import correct from '../correct_symbol.png';
 import wrong from '../wrong_symbol.png';
 
 const error_classes = [
-  { value: 'wrong_order', label: 'Wrong order' }, //what should the right order be (maybe just provide the numbers?)
-  { value: 'wrong_question', label: 'Wrong question asked' },  //provide the question that should have been asked and instead
-  { value: 'unnecessary_question', label: 'Question asked is unnecessary' }, 
+  { value: 'wrong_order', label: 'Wrong order' }, 
+  { value: 'wrong_question', label: 'Wrong question: Asks for information already specified in the text' },
+  { value: 'unnecessary_question', label: 'Wrong question: Doesn\'t relate to the main question' }, 
   { value: 'question_missing', label: 'Question missing' },
   { value: 'incomplete_question', label: 'Question is incomplete' },
   { value: 'other_error', label: 'Another Error (please specify)' },
 ];
 
 type OutputComponentProp = {
-  outputResult: (outputValue: string[], key: string, question_index: string, subquestion: string) => void,
+  outputResult: (outputValue: string[], key: [number, number], question_index: string, subquestion: string) => void,
   question_index: number, 
   subquestion_index: number
   backendResponse: string,
@@ -32,13 +32,13 @@ function OutputRowComponent(props: OutputComponentProp) {
   const handleWrongClick = () => {
     setTransCorrect(transCorrect === 1 ? transCorrect ^ 1: 0); 
     setTransWrong(1); //wrong symbol has full opacity
-    props.outputResult(["false", ""], (props.subquestion_index-1).toString(), (props.question_index-1).toString(), props.backendResponse);
+    props.outputResult(["false", ""], [(props.question_index-1), (props.subquestion_index-1)], "random string", props.backendResponse);
   };
 
   const handleCorrectClick = () => {
     setTransWrong(transWrong === 1 ? transWrong ^ 1: 0); 
     setTransCorrect(1); //correct symbol has full opacity
-    props.outputResult(["true", ""], (props.subquestion_index-1).toString(), (props.question_index-1).toString(), props.backendResponse);
+    props.outputResult(["true", ""], [(props.question_index-1), (props.subquestion_index-1)], "random string", props.backendResponse);
   };
 
   const handleSelectChange = (selectedOption: any) => {
@@ -49,7 +49,7 @@ function OutputRowComponent(props: OutputComponentProp) {
     } else {
       setSpecifyError(false);
     }*/
-    props.outputResult(["false", selectedOption.label], (props.subquestion_index-1).toString(), (props.question_index-1).toString(), props.backendResponse) //returning the output to the parent
+    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], "random string", props.backendResponse) //returning the output to the parent
   };
 
   return (
@@ -102,7 +102,7 @@ class SpecifyErrorText extends React.Component<{}, { error: string, text: string
         <form onSubmit={this.handleSubmit} style={{textAlign: 'center'}}>
           <TextareaAutosize 
               className='textarea'
-              placeholder="Please specify the error"
+              placeholder="Please specify..."
               value={this.state.error}
               onChange={this.handleInputChange}
               minRows={3} 

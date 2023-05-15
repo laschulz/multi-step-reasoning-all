@@ -37,20 +37,27 @@ const handleQuestion = (questionValue: string[], expectedAnswer: string[]) => {
   setQuestions(questionValue);
   setExpectedAnswer(expectedAnswer);
 }
-const handleOutput = (outputValue: string[][]) => {
+const handleOutput = (outputValue: string[][]) => { //issue is here
   csvRows = [];
+  var counter = 0;
   for (let i = 0; i < outputValue.length; i++) {
     if (i<outputValue.length-1){
-      if (outputValue[i][0] === outputValue[i+1][0]){
+      if (outputValue[i][0] === outputValue[i+1][0] && outputValue[i][1] === outputValue[i+1][1]){
         continue;
       }
     }
     var rowArray = outputValue[i];
-    console.log("rowArray is: " + rowArray)
-    var q_index = rowArray[1]
-    var q = questions[parseInt(q_index)].replace(/,/g, ""); //replace the commas because otherwise csv parsing gets messed up
+    console.log("rowArray is: " + rowArray);
+
+    //Structure of rowArray: question_index, subquestion_index, true/false, error type, additional comments
+    var q_index = rowArray[0];
+    var q = questions[parseInt(q_index)+1].replace(/,/g, ""); //replace the commas because otherwise csv parsing gets messed up
     var subquestion = rowArray[2].replace(/,/g, "");
-    var row = [rowArray[0], model, q, subquestion, ...rowArray.slice(3)];
+
+    //Structure of output: unique index, model, input question, generated subquestion, true/false, error type, additional comments
+    var row = [counter.toString(), model, q, subquestion, ...rowArray.slice(3)];
+    counter++;
+
     console.log("row is: "+ i);
     csvRows.push(row)
   }

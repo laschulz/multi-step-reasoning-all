@@ -14,11 +14,16 @@ function OutputComponent(props: OutputComponentProp){
   
   const [outputResult, setOutputResult] = useState<string[][]>([]);
 
-  const handleRowOutput = (outputValue: string[], key: string, question_index: string, subquestion: string) => {
-    var updatedOutput = [...outputResult, [key].concat(question_index, subquestion, outputValue)];
+  const handleRowOutput = (outputValue: string[], key: [number, number], question_index: string, subquestion: string) => {
+    var updatedOutput = [...outputResult, [key[0].toString()].concat(key[1].toString(), subquestion, outputValue)];
     
     //have to sort because it happens sometimes that the questions are unsorted
-    updatedOutput.sort((a, b) => parseInt(a[0]) - parseInt(b[0])); 
+    updatedOutput.sort((a, b) => {
+      if (parseInt(a[0]) === parseInt(b[0])) {
+        return parseInt(a[1]) - parseInt(b[1]);
+      }
+      return parseInt(a[0]) - parseInt(b[0]);
+    });
     props.outputResult(updatedOutput);
     setOutputResult(updatedOutput);
     console.log("outputResult: " + outputResult);
@@ -26,7 +31,7 @@ function OutputComponent(props: OutputComponentProp){
 
   const rows = [];  
   for (let i = 0; i < props.numberQuestions; i++) {
-    if (typeof(props.backendResponse[i]) !== 'undefined') { // doesn't really fix the issue
+    if (typeof(props.backendResponse[i]) !== 'undefined') { 
       for (let j = 0; j < props.backendResponse[i].length; j++){
         if (props.backendResponse[i][j] === ""){
           continue;
@@ -34,7 +39,7 @@ function OutputComponent(props: OutputComponentProp){
         rows.push(
           <OutputRowComponent 
             outputResult={handleRowOutput} 
-            key={i} 
+            key={`${i}-${j}`} 
             question_index={i+1} 
             subquestion_index={j+1}
             backendResponse={props.backendResponse[i][j]}
