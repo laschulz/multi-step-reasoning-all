@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import './Select.css';
@@ -15,12 +15,14 @@ const error_classes = [
   { value: 'other_error', label: 'Another Error (please specify)' },
 ];
 
+const backend = "http://127.0.0.1:8000/bert_score"
+
 type OutputComponentProp = {
   outputResult: (outputValue: string[], key: [number, number], subquestion: string, errorText: string) => void,
   question_index: number, 
-  subquestion_index: number
-  backendResponse: string,
-  expectedAnswer: string,
+  subquestion_index: number,
+  subquestion: string,
+  expectedAnswer: string[],
   question_asked: string
 }
 
@@ -30,16 +32,59 @@ function OutputRowComponent(props: OutputComponentProp) {
   const [transWrong, setTransWrong] = useState(1); //defines the opacity of the wrong symbol
   const [specifyError, setSpecifyError] = useState(false); //needed for the case, when the user wants to define a new error class
 
+  /*useEffect(() => {
+    for (let i= 0; i < props.expectedAnswer.length; i++){
+      if ((props.subquestion_index-1) === i ){ // it is correct
+        handleCorrectClick();
+      } else{ //it is wrong
+        handleWrongClick();
+      }
+    }
+  }, []) // Empty array as the second argument means the effect runs only once*/
+
+  useEffect(() => {
+    if (props.expectedAnswer.length > 0){
+      var length = props.expectedAnswer.length
+      var bert_score = [0];//Array(length).fill("0");
+      
+      for (let i= 0; i < props.expectedAnswer.length; i++){
+        fetch(backend, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            predictions: [props.subquestion],//Array(length).fill(props.subquestion),
+            references: [props.expectedAnswer[i]]
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          bert_score = data;
+        });
+        
+        console.log("bert_score: " + bert_score)
+        console.log("expected: " + props.expectedAnswer[0])
+        console.log("prediction: " + props.subquestion)
+        if (bert_score[0] > 0.95 ){
+          handleCorrectClick();
+        } else {
+          handleWrongClick();
+        }
+      }
+    }
+  }, [])
+
   const handleWrongClick = () => {
     setTransCorrect(transCorrect === 1 ? transCorrect ^ 1: 0); 
     setTransWrong(1); //wrong symbol has full opacity
-    props.outputResult(["false", ""], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, "");
+    props.outputResult(["false", ""], [(props.question_index-1), (props.subquestion_index-1)], props.subquestion, "");
   };
 
   const handleCorrectClick = () => {
     setTransWrong(transWrong === 1 ? transWrong ^ 1: 0); 
     setTransCorrect(1); //correct symbol has full opacity
-    props.outputResult(["true", ""], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, "");
+    props.outputResult(["true", ""], [(props.question_index-1), (props.subquestion_index-1)], props.subquestion, "");
   };
 
   const handleSelectChange = (selectedOption: any) => {
@@ -50,11 +95,11 @@ function OutputRowComponent(props: OutputComponentProp) {
     } else {
       setSpecifyError(false);
     }*/
-    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, "") 
+    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], props.subquestion, "") 
   };
 
   const handleSpecificError = (error: string, selectedOption: any) => {
-    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], props.backendResponse, error)
+    props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], props.subquestion, error)
   }
 
   return (
@@ -65,10 +110,10 @@ function OutputRowComponent(props: OutputComponentProp) {
         </div>
         <div style={{whiteSpace: "pre-line"}}>
           {props.question_asked}<br/><br/>
-          {props.backendResponse + "?"}
+          {props.subquestion + "?"}
         </div>
       </div>
-      {props.expectedAnswer != "" ?  (
+      {props.expectedAnswer[0] != "" ?  (
         <div className="TextBox">
           <div style={{whiteSpace: "pre-line"}}>
             {'Expected answer:\n ' + props.expectedAnswer}

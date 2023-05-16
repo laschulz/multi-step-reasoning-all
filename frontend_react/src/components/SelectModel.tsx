@@ -36,7 +36,7 @@ class SelectModelComponent extends Component<SelectModelComponentProps, SelectMo
     let message = '';
     if (selectedOption?.value === 'model1') {
       message = model1_text;
-    } else if (selectedOption?.value === 'model2') {
+    } else if (selectedOption?.value === 'T5-large') {
       message = model2_text;
     } else if (selectedOption?.value === 'model3') {
       message = model3_text;

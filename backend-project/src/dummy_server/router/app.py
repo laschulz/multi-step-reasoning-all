@@ -1,19 +1,15 @@
 import argparse
 import os
-import requests
-import json
 
 from flask import Flask, request
 from flask import jsonify
 from flask_cors import CORS
+from evaluate import load
 
 from dummy_server.router.routes import add_routes
 from ..modules.inference import infer_t5, infer_t5_local, gpt_2
 
 
-API_URL = "https://api-inference.huggingface.co/models/t5-small"
-API_TOKEN = "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"
-headers = {"Authorization": f"Bearer " + API_TOKEN}
 
 def create_app():
     app = Flask(__name__)  # static_url_path, static_folder, template_folder...
@@ -46,7 +42,17 @@ def create_app():
         
         return jsonify({'output': output})
     
+    @app.route('/bert_score', methods=['POST', 'GET'])
+    def bert_score(): #local right now
+        bertscore = load("bertscore")
+        predictions = request.json['predictions']
+        references = request.json['references']
+        results = bertscore.compute(predictions=predictions, references=references, lang="en")
+        return jsonify({'score': results['f1']})
+
     return app
+
+    
 
 
 def start_server():

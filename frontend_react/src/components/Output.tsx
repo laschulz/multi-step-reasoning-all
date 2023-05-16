@@ -6,7 +6,7 @@ type OutputComponentProp = {
   outputResult: (outputValue: string[][]) => void,
   numberQuestions: number, 
   backendResponse: string[][],
-  expectedAnswer: string[],
+  expectedAnswer: string[][],
   questions_asked: string[]
 }
 
@@ -41,8 +41,8 @@ function OutputComponent(props: OutputComponentProp){
             key={`${i}-${j}`} 
             question_index={i+1} 
             subquestion_index={j+1}
-            backendResponse={props.backendResponse[i][j]}
-            expectedAnswer={props.expectedAnswer.length-i > 0 ? props.expectedAnswer[i] : ""}
+            subquestion={props.backendResponse[i][j]}
+            expectedAnswer={props.expectedAnswer.length-i > 0 ? props.expectedAnswer[i] : [""]}
             question_asked={props.questions_asked[i]}
           />);
       }

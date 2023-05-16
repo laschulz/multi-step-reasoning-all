@@ -1,4 +1,4 @@
-import {useState } from 'react';
+import {useRef, useState} from 'react';
 import './App.css';
 import SelectModelComponent from './components/SelectModel';
 import HeaderComponent from './components/Header';
@@ -8,21 +8,24 @@ import LoadingSpinner from './components/LoadingSpinner'
 
 const backend = "http://127.0.0.1:8000/models"
 
-let csvRows: string[][] = [];
-
 function App() {
   const [showDiv, setShowDiv] = useState(false);
   const [model, setModel] = useState(''); //stores the selected model
   const [questions, setQuestions] = useState<string[]>([]); //stores the selected questions
-  const [expectedAnswer, setExpectedAnswer] = useState<string[]>([]);
+  const [expectedAnswer, setExpectedAnswer] = useState<string[][]>([[]]);
   const [backendStuff, setbackendStuff] = useState({ //using this for the backend connection, maybe can simplify this later
     output: [[]]
 });
   const [isLoading, setIsLoading] = useState(false);
+  //const [counter, setCounter] = useState<number>(0);
+  var counter = useRef<number>(0);
+  var csvRows = useRef<string[][]>([[]]);
+
 
 //all handle functions (sorted alphabetically)
 const handleDownload = () => {
-  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + csvRows.map(row => row.join(",")).join("\r\n");
+  const finalRows = removeDuplicates();
+  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + finalRows.map(row => row.join(",")).join("\r\n");
   const encodedUri = encodeURI(csvContent);
   var link = document.createElement("a");
   link.setAttribute("href", encodedUri);
@@ -30,24 +33,19 @@ const handleDownload = () => {
   document.body.appendChild(link); // Required for FF
   link.click(); // This will download the data file named "results.csv".
 }
-const handleModel = (modelValue: string) => {
-  setModel(modelValue);
-}
-const handleQuestion = (questionValue: string[], expectedAnswer: string[]) => {
-  setQuestions(questionValue);
-  setExpectedAnswer(expectedAnswer);
-}
-const handleOutput = (outputValue: string[][]) => {
-  csvRows = [];
-  var counter = 0;
-  for (let i = 0; i < outputValue.length; i++) {
-    if (i<outputValue.length-1){
-      if (outputValue[i][0] === outputValue[i+1][0] && outputValue[i][1] === outputValue[i+1][1]){
+const removeDuplicates = () => {
+  var finalRows = [];
+  for (let i = 0; i < csvRows.current.length; i++){
+    if(i<csvRows.current.length-1){
+      if (csvRows.current[i].length === 0) {
+        continue;
+      }else if (csvRows.current[i][0] === csvRows.current[i+1][0] && csvRows.current[i][1] === csvRows.current[i+1][1]) {
         continue;
       }
     }
-    var rowArray = outputValue[i];
 
+    var rowArray = csvRows.current[i];
+    console.log(rowArray);
     //Structure of rowArray: question_index, subquestion_index, true/false, error type, additional comments
     var q_index = rowArray[0];
 
@@ -60,10 +58,41 @@ const handleOutput = (outputValue: string[][]) => {
     var subquestion = rowArray[2].replace(/,/g, "");
 
     //Structure of output: unique index, model, input question, generated subquestion, true/false, error type, additional comments
-    var row = [counter.toString(), model, q, subquestion, ...rowArray.slice(3)];
-    counter++;
+    var row = [counter.current.toString(), model, q, subquestion, ...rowArray.slice(3)];
+    counter.current++;
 
-    csvRows.push(row)
+    finalRows.push(row)
+  }
+  return finalRows;
+}
+
+const handleModel = (modelValue: string) => {
+  setModel(modelValue);
+}
+const handleQuestion = (questionValue: string[], expectedAnswer: string[]) => {
+  setQuestions(questionValue);
+  var parsed_expectedAnswer = parser_expectedAnswer(expectedAnswer)
+  setExpectedAnswer(parsed_expectedAnswer);
+}
+const parser_expectedAnswer = (expectedAnswer: string[]) => {
+  if (expectedAnswer.length > 1){
+    expectedAnswer = expectedAnswer.slice(1);
+  }
+  var parsed_expectedAnswer = Array(expectedAnswer.length);
+  for (let i = 0; i < expectedAnswer.length; i++){
+    var temp = expectedAnswer[i].split('\n');
+    temp = temp.map(line => line.split('**')[0])
+    if (temp[temp.length-1].includes('###')){ //to exclude the expected calculated answer and just keep the questions
+      temp.pop()
+    }
+    parsed_expectedAnswer[i] = temp; 
+  }
+  console.log(parsed_expectedAnswer);
+  return parsed_expectedAnswer;
+}
+const handleOutput = (outputValue: string[][]) => {
+  for (let i = 0; i < outputValue.length; i++){
+    csvRows.current.push(outputValue[i])
   }
 }
 const handleRefresh = () => {
@@ -90,6 +119,7 @@ const handleRunModel = () => {
     return response.json();})
   .then(data => {
     setIsLoading(false);
+    counter.current = 0;
     console.log("data.output is: " + data.output);
     setbackendStuff({
       output: splitOutput(data.output)
@@ -103,11 +133,7 @@ const handleRunModel = () => {
 function splitOutput (arr: string[]){
   var o = Array(arr.length);
   for (let i=0; i < arr.length; i++){
-    if (o[i] === ''){
-      o[i] = ["empty"] //maybe not needed
-    }else{
-      o[i] = arr[i].split('?');
-    }
+    o[i] = arr[i].split('?');
   }
   return o;
 }
@@ -142,7 +168,7 @@ function splitOutput (arr: string[]){
                 outputResult={handleOutput} 
                 numberQuestions={questions.length > 1 ? questions.length-1 : questions.length} 
                 backendResponse={questions.length > 1 ? backendStuff.output.slice(1) : backendStuff.output} 
-                expectedAnswer={questions.length > 1 ? expectedAnswer.slice(1): expectedAnswer} 
+                expectedAnswer={expectedAnswer} //it's already sliced correctly in the function parser_expectedAnswer
                 questions_asked={questions.length > 1 ? questions.slice(1) : questions}
               /><br/>
 
