@@ -7,7 +7,7 @@ from flask_cors import CORS
 from evaluate import load
 
 from dummy_server.router.routes import add_routes
-from ..modules.inference import infer_t5, infer_t5_local, gpt_2
+from ..modules.inference import infer_t5, infer_t5_local, gpt_2, bert_score_call
 
 
 
@@ -45,10 +45,13 @@ def create_app():
     @app.route('/bert_score', methods=['POST', 'GET'])
     def bert_score(): #local right now
         bertscore = load("bertscore")
+        index = request.json['index']
         predictions = request.json['predictions']
         references = request.json['references']
+        bert_score_call(predictions, references)
         results = bertscore.compute(predictions=predictions, references=references, lang="en")
-        return jsonify({'score': results['f1']})
+        print(results['f1'])
+        return jsonify({'score': results['f1'], 'index': index})
 
     return app
 

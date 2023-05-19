@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Select from 'react-select';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import './Select.css';
@@ -19,11 +19,13 @@ const backend = "http://127.0.0.1:8000/bert_score"
 
 type OutputComponentProp = {
   outputResult: (outputValue: string[], key: [number, number], subquestion: string, errorText: string) => void,
+  key: string, 
   question_index: number, 
   subquestion_index: number,
   subquestion: string,
   expectedAnswer: string[],
-  question_asked: string
+  question_asked: string,
+  bert_score: number
 }
 
 function OutputRowComponent(props: OutputComponentProp) {
@@ -31,49 +33,15 @@ function OutputRowComponent(props: OutputComponentProp) {
   const [transCorrect, setTransCorrect] = useState(1); //defines the opacity of the correct symbol
   const [transWrong, setTransWrong] = useState(1); //defines the opacity of the wrong symbol
   const [specifyError, setSpecifyError] = useState(false); //needed for the case, when the user wants to define a new error class
-
-  /*useEffect(() => {
-    for (let i= 0; i < props.expectedAnswer.length; i++){
-      if ((props.subquestion_index-1) === i ){ // it is correct
-        handleCorrectClick();
-      } else{ //it is wrong
-        handleWrongClick();
-      }
-    }
-  }, []) // Empty array as the second argument means the effect runs only once*/
+  const bert_score_dict = useRef<{[key: string]: any}>({});
 
   useEffect(() => {
-    if (props.expectedAnswer.length > 0){
-      var length = props.expectedAnswer.length
-      var bert_score = [0];//Array(length).fill("0");
-      
-      for (let i= 0; i < props.expectedAnswer.length; i++){
-        fetch(backend, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            predictions: [props.subquestion],//Array(length).fill(props.subquestion),
-            references: [props.expectedAnswer[i]]
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          bert_score = data;
-        });
-        
-        console.log("bert_score: " + bert_score)
-        console.log("expected: " + props.expectedAnswer[0])
-        console.log("prediction: " + props.subquestion)
-        if (bert_score[0] > 0.95 ){
-          handleCorrectClick();
-        } else {
-          handleWrongClick();
-        }
-      }
+    if (props.bert_score > 0.95){
+      handleCorrectClick();
+    } else {
+      handleWrongClick();
     }
-  }, [])
+  }, []) // Empty array as the second argument means the effect runs only once    
 
   const handleWrongClick = () => {
     setTransCorrect(transCorrect === 1 ? transCorrect ^ 1: 0); 
@@ -110,7 +78,7 @@ function OutputRowComponent(props: OutputComponentProp) {
         </div>
         <div style={{whiteSpace: "pre-line"}}>
           {props.question_asked}<br/><br/>
-          {props.subquestion + "?"}
+          {props.subquestion}
         </div>
       </div>
       {props.expectedAnswer[0] != "" ?  (

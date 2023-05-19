@@ -1,21 +1,22 @@
 import OutputRowComponent from './OutputRow';
 import './Header.css';
-import { useState } from 'react';
+import { useRef} from 'react';
 
 type OutputComponentProp = {
   outputResult: (outputValue: string[][]) => void,
   numberQuestions: number, 
   backendResponse: string[][],
   expectedAnswer: string[][],
-  questions_asked: string[]
+  questions_asked: string[],
+  bert_score: number[][]
 }
 
 function OutputComponent(props: OutputComponentProp){
   
-  const [outputResult, setOutputResult] = useState<string[][]>([]);
+  const outputResult= useRef<string[][]>([]);
 
   const handleRowOutput = (outputValue: string[], key: [number, number], subquestion: string, errorText: string) => {
-    var updatedOutput = [...outputResult, [key[0].toString()].concat(key[1].toString(), subquestion, outputValue, errorText)];
+    var updatedOutput = [...outputResult.current, [key[0].toString()].concat(key[1].toString(), subquestion, outputValue, errorText)];
     
     //have to sort because it happens sometimes that the questions are unsorted
     updatedOutput.sort((a, b) => {
@@ -25,7 +26,7 @@ function OutputComponent(props: OutputComponentProp){
       return parseInt(a[0]) - parseInt(b[0]);
     });
     props.outputResult(updatedOutput);
-    setOutputResult(updatedOutput);
+    outputResult.current = updatedOutput;
   }
 
   const rows = [];  
@@ -44,6 +45,7 @@ function OutputComponent(props: OutputComponentProp){
             subquestion={props.backendResponse[i][j]}
             expectedAnswer={props.expectedAnswer.length-i > 0 ? props.expectedAnswer[i] : [""]}
             question_asked={props.questions_asked[i]}
+            bert_score={props.bert_score[i][j]}
           />);
       }
     }   

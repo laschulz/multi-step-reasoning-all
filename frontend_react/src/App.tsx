@@ -13,16 +13,16 @@ function App() {
   const [model, setModel] = useState(''); //stores the selected model
   const [questions, setQuestions] = useState<string[]>([]); //stores the selected questions
   const [expectedAnswer, setExpectedAnswer] = useState<string[][]>([[]]);
-  const [backendStuff, setbackendStuff] = useState({ //using this for the backend connection, maybe can simplify this later
-    output: [[]]
-});
+  const [modelOutput, setModelOutput] = useState<string[][]>([[]]); //using this for the backend connection, maybe can simplify this later 
   const [isLoading, setIsLoading] = useState(false);
-  //const [counter, setCounter] = useState<number>(0);
+  const [bertScore, setBertScore] = useState<number[][]>([[]]);
   var counter = useRef<number>(0);
   var csvRows = useRef<string[][]>([[]]);
 
 
 //all handle functions (sorted alphabetically)
+
+//handles the Download when Download button is clicked
 const handleDownload = () => {
   const finalRows = removeDuplicates();
   const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + finalRows.map(row => row.join(",")).join("\r\n");
@@ -33,6 +33,8 @@ const handleDownload = () => {
   document.body.appendChild(link); // Required for FF
   link.click(); // This will download the data file named "results.csv".
 }
+
+//removes Duplicates in the csv File called in the handleDownload function
 const removeDuplicates = () => {
   var finalRows = [];
   for (let i = 0; i < csvRows.current.length; i++){
@@ -66,14 +68,19 @@ const removeDuplicates = () => {
   return finalRows;
 }
 
+//sets the model, used in the SelectModel Component
 const handleModel = (modelValue: string) => {
   setModel(modelValue);
 }
+//sets the question, used in the SelectQuestion Component
 const handleQuestion = (questionValue: string[], expectedAnswer: string[]) => {
   setQuestions(questionValue);
   var parsed_expectedAnswer = parser_expectedAnswer(expectedAnswer)
   setExpectedAnswer(parsed_expectedAnswer);
 }
+
+//parses the expected question correctly, used in handleQuestion function
+//returns an array of array of questions
 const parser_expectedAnswer = (expectedAnswer: string[]) => {
   if (expectedAnswer.length > 1){
     expectedAnswer = expectedAnswer.slice(1);
@@ -90,50 +97,114 @@ const parser_expectedAnswer = (expectedAnswer: string[]) => {
   console.log(parsed_expectedAnswer);
   return parsed_expectedAnswer;
 }
+
+//handles the Output Component, adds everything that is returned to csvRows (even if it's duplicated)
 const handleOutput = (outputValue: string[][]) => {
   for (let i = 0; i < outputValue.length; i++){
     csvRows.current.push(outputValue[i])
   }
 }
+
+//for the refresh button
+//TODO: might have to work on that to make it smarter
 const handleRefresh = () => {
-  window.location.reload(); //TODO: might have to work on that to make it smarter
+  window.location.reload(); 
 };
 
 //communicate with API
-const handleRunModel = () => {
+async function handleRunModel(){
   setIsLoading(true);
-  fetch(backend, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json' //might has to be adjusted
-  },
-  body: JSON.stringify({
-    model: model,
-    questions: questions
-  })
-})
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();})
-  .then(data => {
-    setIsLoading(false);
-    counter.current = 0;
-    console.log("data.output is: " + data.output);
-    setbackendStuff({
-      output: splitOutput(data.output)
-    });
-  })
-  .catch(error => {console.error(error); throw error});
-    
+  var split_output = await get_model_output();
+  console.log("split_output", split_output)
+  await compute_bert_score(split_output);
+  setIsLoading(false);
   setShowDiv(true);
 };
 
+//get output from the model in backend
+async function get_model_output(): Promise<string[][]> {
+  try {
+    const response = await fetch(backend, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: model,
+        questions: questions
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    counter.current = 0;
+    const split_output = splitOutput(data.output);
+
+    if (split_output.length > 1) {
+      setModelOutput(split_output.slice(1));
+      return split_output.slice(1);
+    } else {
+      setModelOutput(split_output);
+      return split_output;
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+async function compute_bert_score(split_output: string[][]): Promise<void> {
+  var bert_score = new Array(split_output.length).fill([]);
+  for (let i = 0; i < split_output.length; i++) {
+    //var predictions = split_output[i].slice(0, Math.min(split_output[i].length, expectedAnswer[i].length));
+    //var references = expectedAnswer[i].slice(0, Math.min(split_output[i].length, expectedAnswer[i].length));
+    var predictions = split_output[i];
+    var references = expectedAnswer[i].slice(0, split_output[i].length);
+
+    while (references.length < predictions.length){
+      references.push(references[references.length-1])
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/bert_score", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        //check if it's not an empty array
+        body: JSON.stringify({ //making sure both arrays have the same length => so far, only comparing the same location, this doesn't cover all errors
+          index: i,
+          predictions: predictions, //ith-question, array
+          references: references //ith-expectedAnswer, array 
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+
+      const data = await response.json();
+      const index = data.index;
+      bert_score[index] = data.score;
+      console.log("data: " + data);
+    } catch (error) {
+      console.error(error);
+      // Handle the error state or display an error message to the user
+    }
+  }
+  console.log(bert_score)
+  setBertScore(bert_score);
+}
+
+
+//splits the output that is received from the backend by questions and returns an array of arrays of questions
 function splitOutput (arr: string[]){
   var o = Array(arr.length);
   for (let i=0; i < arr.length; i++){
-    o[i] = arr[i].split('?');
+    o[i] = arr[i].split('?').map((entry) => ((entry.trim() === "") ? "" : entry + '?'));
   }
   return o;
 }
@@ -166,13 +237,14 @@ function splitOutput (arr: string[]){
               the fact that it's the header row */}
               <OutputComponent 
                 outputResult={handleOutput} 
-                numberQuestions={questions.length > 1 ? questions.length-1 : questions.length} 
-                backendResponse={questions.length > 1 ? backendStuff.output.slice(1) : backendStuff.output} 
+                numberQuestions={questions.length > 1 ? questions.length-1 : questions.length} //replace this with modelOutput.length?
+                backendResponse={modelOutput} 
                 expectedAnswer={expectedAnswer} //it's already sliced correctly in the function parser_expectedAnswer
                 questions_asked={questions.length > 1 ? questions.slice(1) : questions}
+                bert_score = {bertScore}
               /><br/>
 
-              <h2>5. Download as .csv File</h2>
+              <h2>5. Download results as .csv File</h2>
               <div className='center'>
                 <button onClick={handleDownload}>Download</button>
               </div>

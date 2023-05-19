@@ -7,7 +7,6 @@ import Papa from 'papaparse';
 const options= [
     {value: 'question1', label: 'Example Question: Tina\'s Salary'},
     {value: 'question2', label: 'Example Question: Cars in Parking Lot'},
-    {value: 'question3', label: 'Question3'},
     {value: 'write_own', label: 'Write your own question'},
     {value: 'csv', label: 'Upload .csv File'},
   ]
@@ -50,18 +49,29 @@ function InputCSV(props: InputCSVComponentProp){
   }
   
   return(
-    <div style={{textAlign: 'center'}}>
-      <label htmlFor='file-upload' className='custom-file-upload'>
-        {fileName ? fileName + " uploaded" : 'Upload CSV'}
-      </label>
-      <input
-        id='file-upload'
-        type="file"
-        accept=".csv"
-        onChange={handleOnSubmitCSV}
-        style={{display: 'none'}}
-      />
+    <div>
+      <div className={'TextBox'}>
+        {"Please submit a file that fulfills the following requirements for the model to work properly: "}<br/>
+        {"1. The first row is a header row."}<br/>
+        {"2. The first column is for the questions."}<br/>
+        {"3. The second column is for the expected answers. This information is optional. The expected answers should be formated such that the expected subquestion is before its calculation."}<br/><br/>
+        {"Do not upload csv Files that exceed 100 rows as this might exceed the possible server load."}
+      </div>
+    
+      <div style={{textAlign: 'center'}}>
+        <label htmlFor='file-upload' className='custom-file-upload'>
+          {fileName ? fileName + " uploaded" : 'Upload CSV'}
+        </label>
+        <input
+          id='file-upload'
+          type="file"
+          accept=".csv"
+          onChange={handleOnSubmitCSV}
+          style={{display: 'none'}}
+        />
+      </div>
     </div>
+    
   );
 }
 

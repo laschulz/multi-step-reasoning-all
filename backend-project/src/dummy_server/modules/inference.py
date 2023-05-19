@@ -52,3 +52,6 @@ def gpt_2(input_array):
 
 def get_URL(model_name):
     return API_URL + model_name
+
+def bert_score_call(predictions, references):
+    return 0
