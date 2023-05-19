@@ -33,7 +33,6 @@ function OutputRowComponent(props: OutputComponentProp) {
   const [transCorrect, setTransCorrect] = useState(1); //defines the opacity of the correct symbol
   const [transWrong, setTransWrong] = useState(1); //defines the opacity of the wrong symbol
   const [specifyError, setSpecifyError] = useState(false); //needed for the case, when the user wants to define a new error class
-  const bert_score_dict = useRef<{[key: string]: any}>({});
 
   useEffect(() => {
     if (props.bert_score > 0.95){

@@ -19,6 +19,7 @@ function OutputComponent(props: OutputComponentProp){
     var updatedOutput = [...outputResult.current, [key[0].toString()].concat(key[1].toString(), subquestion, outputValue, errorText)];
     
     //have to sort because it happens sometimes that the questions are unsorted
+    //PROBABLY CAN REMOVE IT HERE
     updatedOutput.sort((a, b) => {
       if (parseInt(a[0]) === parseInt(b[0])) {
         return parseInt(a[1]) - parseInt(b[1]);
@@ -26,6 +27,7 @@ function OutputComponent(props: OutputComponentProp){
       return parseInt(a[0]) - parseInt(b[0]);
     });
     props.outputResult(updatedOutput);
+    
     outputResult.current = updatedOutput;
   }
 

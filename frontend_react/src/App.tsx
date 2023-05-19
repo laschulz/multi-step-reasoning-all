@@ -17,7 +17,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [bertScore, setBertScore] = useState<number[][]>([[]]);
   var counter = useRef<number>(0);
-  var csvRows = useRef<string[][]>([[]]);
+  //var csvRows = useRef<string[][]>([[]]);
+  const csvRows_dict = useRef<{[key: string]: any}>({});
 
 
 //all handle functions (sorted alphabetically)
@@ -25,6 +26,7 @@ function App() {
 //handles the Download when Download button is clicked
 const handleDownload = () => {
   const finalRows = removeDuplicates();
+  console.log(finalRows);
   const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + finalRows.map(row => row.join(",")).join("\r\n");
   const encodedUri = encodeURI(csvContent);
   var link = document.createElement("a");
@@ -37,16 +39,9 @@ const handleDownload = () => {
 //removes Duplicates in the csv File called in the handleDownload function
 const removeDuplicates = () => {
   var finalRows = [];
-  for (let i = 0; i < csvRows.current.length; i++){
-    if(i<csvRows.current.length-1){
-      if (csvRows.current[i].length === 0) {
-        continue;
-      }else if (csvRows.current[i][0] === csvRows.current[i+1][0] && csvRows.current[i][1] === csvRows.current[i+1][1]) {
-        continue;
-      }
-    }
-
-    var rowArray = csvRows.current[i];
+  console.log("csvRows_dict ", csvRows_dict.current);
+  for (var rowKey in csvRows_dict.current){
+    var rowArray = csvRows_dict.current[rowKey];
     console.log(rowArray);
     //Structure of rowArray: question_index, subquestion_index, true/false, error type, additional comments
     var q_index = rowArray[0];
@@ -101,7 +96,13 @@ const parser_expectedAnswer = (expectedAnswer: string[]) => {
 //handles the Output Component, adds everything that is returned to csvRows (even if it's duplicated)
 const handleOutput = (outputValue: string[][]) => {
   for (let i = 0; i < outputValue.length; i++){
-    csvRows.current.push(outputValue[i])
+    //Structure of rowArray: question_index, subquestion_index, true/false, error type, additional comments
+    var current_row = outputValue[i];
+    const question_index = current_row[0];
+    const subquestion_index = current_row[1];
+    csvRows_dict.current[`${question_index}-${subquestion_index}`] = current_row;
+    console.log(csvRows_dict.current)
+    //csvRows.current.push(outputValue[i])
   }
 }
 
@@ -159,11 +160,10 @@ async function get_model_output(): Promise<string[][]> {
 async function compute_bert_score(split_output: string[][]): Promise<void> {
   var bert_score = new Array(split_output.length).fill([]);
   for (let i = 0; i < split_output.length; i++) {
-    //var predictions = split_output[i].slice(0, Math.min(split_output[i].length, expectedAnswer[i].length));
-    //var references = expectedAnswer[i].slice(0, Math.min(split_output[i].length, expectedAnswer[i].length));
+    
+    //making sure they have the same length
     var predictions = split_output[i];
     var references = expectedAnswer[i].slice(0, split_output[i].length);
-
     while (references.length < predictions.length){
       references.push(references[references.length-1])
     }
@@ -198,7 +198,6 @@ async function compute_bert_score(split_output: string[][]): Promise<void> {
   console.log(bert_score)
   setBertScore(bert_score);
 }
-
 
 //splits the output that is received from the backend by questions and returns an array of arrays of questions
 function splitOutput (arr: string[]){
