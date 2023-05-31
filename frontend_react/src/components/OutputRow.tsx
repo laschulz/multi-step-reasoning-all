@@ -84,6 +84,7 @@ function OutputRowComponent(props: OutputComponentProp) {
         <div className="TextBox">
           <div style={{whiteSpace: "pre-line"}}>
             {'Expected answer:\n ' + props.expectedAnswer}
+            {'\nBert score: ' + props.bert_score}
           </div>
         </div>
       ): null

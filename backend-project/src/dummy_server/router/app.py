@@ -7,7 +7,7 @@ from flask_cors import CORS
 from evaluate import load
 
 from dummy_server.router.routes import add_routes
-from ..modules.inference import infer_t5, infer_t5_local, gpt_2, bert_score_call
+from ..modules.inference import infer_t5, infer_t5_local, gpt_2, gpt_3
 
 
 
@@ -39,6 +39,8 @@ def create_app():
                             "parameters": {"max_new_tokens": 100},
                             "options": {"wait_for_model": True}
                             })
+        elif (requestedModel=='gpt3'):
+            output = gpt_3(requestedQuestion)
         
         return jsonify({'output': output})
     
@@ -48,9 +50,7 @@ def create_app():
         index = request.json['index']
         predictions = request.json['predictions']
         references = request.json['references']
-        bert_score_call(predictions, references)
         results = bertscore.compute(predictions=predictions, references=references, lang="en")
-        print(results['f1'])
         return jsonify({'score': results['f1'], 'index': index})
 
     return app
