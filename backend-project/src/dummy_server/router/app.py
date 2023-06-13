@@ -26,12 +26,12 @@ def create_app():
         requestedQuestion = request.json['questions']
 
         output = ['']
-        if (requestedModel=='model1'):
+        if (requestedModel=='Flan-T5'):
             output = infer_t5({"inputs": requestedQuestion, 
                             "options": {"wait_for_model": True}
                             })
             print(output)
-        elif (requestedModel=='T5-large'):
+        elif (requestedModel=='Flan-T5-local'):
             output = infer_t5_local(requestedQuestion)
             print(output)
         elif (requestedModel=='model3'):

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import './Select.css';
@@ -6,16 +6,15 @@ import correct from '../correct_symbol.png';
 import wrong from '../wrong_symbol.png';
 
 const error_classes = [
-  { value: 'wrong_order', label: 'Wrong order' }, 
-  { value: 'wrong_question', label: 'Wrong question' }, 
-  { value: 'information_given', label: 'Wrong question: Asks for information already specified in the text' },
-  { value: 'unnecessary_question', label: 'Wrong question: Doesn\'t relate to the main question' }, 
-  { value: 'question_missing', label: 'Question missing' },
-  { value: 'incomplete_question', label: 'Question is incomplete' },
+  { value: 'incomplete_question', label: 'Incomplete Question Generation' },
+  { value: 'information_given', label: 'Irrelevant Question Generation: Asking for already provided information' },
+  { value: 'unnecessary_question', label: 'Irrelevant Question Generation: Doesn\'t relate to the expected answer' }, 
+  { value: 'incorrect_specificity_overemphasis', label: 'Incorrect Specificity Emphasis: Over-Emphasis' },
+  { value: 'incorrect_specificity_underemphasis', label: 'Incorrect Specificity Emphasis: Under-Emphasis' },
+  { value: 'wrong_order', label: 'Incorrect Ordering of Questions' }, 
+  { value: 'question_missing', label: 'Missing Relevant Question' },
   { value: 'other_error', label: 'Another Error (please specify)' },
 ];
-
-const backend = "http://127.0.0.1:8000/bert_score"
 
 type OutputComponentProp = {
   outputResult: (outputValue: string[], key: [number, number], subquestion: string, errorText: string) => void,
@@ -34,12 +33,30 @@ function OutputRowComponent(props: OutputComponentProp) {
   const [transWrong, setTransWrong] = useState(1); //defines the opacity of the wrong symbol
   const [specifyError, setSpecifyError] = useState(false); //needed for the case, when the user wants to define a new error class
 
+  // using the test results from the analysis of Laura's Bachelor Thesis
   useEffect(() => {
-    if (props.bert_score > 0.95){
-      handleCorrectClick();
-    } else {
-      handleWrongClick();
+    if (props.expectedAnswer[0] !== ""){
+      const question_stripped = props.subquestion.trim();
+      const expected_stripped = props.expectedAnswer[props.subquestion_index-1].trim();
+
+      if (props.bert_score > 0.9925){
+        handleCorrectClick();
+      } else if (props.bert_score < 0.8925){
+        handleWrongClick()
+      } else if (question_stripped.split(/\s+/).length < 5){
+        handleWrongClick()
+      } else if (expected_stripped.startsWith(question_stripped.slice(0, -1))){
+        handleWrongClick()
+      }
+      else { //can't really say anything about the results
+        if (props.bert_score > 0.95) {
+          handleCorrectClick()
+        }else {
+          handleWrongClick()
+        }
+      }
     }
+    
   }, []) // Empty array as the second argument means the effect runs only once    
 
   const handleWrongClick = () => {
@@ -57,11 +74,11 @@ function OutputRowComponent(props: OutputComponentProp) {
   const handleSelectChange = (selectedOption: any) => {
     setSelectedOption(selectedOption);
     setSpecifyError(true)
-    /*if (selectedOption.value === 'other_error'){
+    if (selectedOption.value === 'other_error'){
       setSpecifyError(true);
     } else {
       setSpecifyError(false);
-    }*/
+    }
     props.outputResult(["false", selectedOption.label], [(props.question_index-1), (props.subquestion_index-1)], props.subquestion, "") 
   };
 
@@ -80,7 +97,7 @@ function OutputRowComponent(props: OutputComponentProp) {
           {props.subquestion}
         </div>
       </div>
-      {props.expectedAnswer[0] != "" ?  (
+      {props.expectedAnswer[0] !== "" ?  (
         <div className="TextBox">
           <div style={{whiteSpace: "pre-line"}}>
             {'Expected answer:\n ' + props.expectedAnswer}

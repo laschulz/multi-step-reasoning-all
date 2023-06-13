@@ -5,6 +5,7 @@ import HeaderComponent from './components/Header';
 import SelectQuestionComponent from './components/SelectQuestion';
 import OutputComponent from './components/Output';
 import LoadingSpinner from './components/LoadingSpinner'
+import exp from 'constants';
 
 const backend = "http://127.0.0.1:8000/models"
 
@@ -116,7 +117,7 @@ const handleRefresh = () => {
 async function handleRunModel(){
   setIsLoading(true);
   var split_output = await get_model_output();
-  console.log("split_output", split_output)
+  console.log("split_output", split_output);
   await compute_bert_score(split_output);
   setIsLoading(false);
   setShowDiv(true);
@@ -142,8 +143,8 @@ async function get_model_output(): Promise<string[][]> {
 
     const data = await response.json();
     counter.current = 0;
+    console.log("data output: ", data.output)
     const split_output = splitOutput(data.output);
-
     if (split_output.length > 1) {
       setModelOutput(split_output.slice(1));
       return split_output.slice(1);
@@ -162,40 +163,48 @@ async function compute_bert_score(split_output: string[][]): Promise<void> {
   for (let i = 0; i < split_output.length; i++) {
     
     //making sure they have the same length
-    var predictions = split_output[i];
+    
+    /*var predictions = split_output[i];
     var references = expectedAnswer[i].slice(0, split_output[i].length);
     while (references.length < predictions.length){
       references.push(references[references.length-1])
+    }*/
+    
+    if (expectedAnswer.length === 0 || expectedAnswer[i].length === 0){
+      bert_score[i] = new Array(split_output[i].length).fill(0);
     }
-
-    try {
-      const response = await fetch("http://127.0.0.1:8000/bert_score", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        //check if it's not an empty array
-        body: JSON.stringify({ //making sure both arrays have the same length => so far, only comparing the same location, this doesn't cover all errors
-          index: i,
-          predictions: predictions, //ith-question, array
-          references: references //ith-expectedAnswer, array 
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Request failed');
+    else {
+      var predictions = split_output[i]
+      var references = expectedAnswer[i]
+      try {
+        const response = await fetch("http://127.0.0.1:8000/bert_score", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          //check if it's not an empty array
+          body: JSON.stringify({ //making sure both arrays have the same length => so far, only comparing the same location, this doesn't cover all errors
+            index: i,
+            predictions: predictions, //ith-question, array
+            references: references //ith-expectedAnswer, array 
+          })
+        });
+  
+        if (!response.ok) {
+          throw new Error('Request failed');
+        }
+  
+        const data = await response.json();
+        const index = data.index;
+        bert_score[index] = data.score;
+        console.log("data: " + data);
+      } catch (error) {
+        console.error(error);
+        // Handle the error state or display an error message to the user
       }
-
-      const data = await response.json();
-      const index = data.index;
-      bert_score[index] = data.score;
-      console.log("data: " + data);
-    } catch (error) {
-      console.error(error);
-      // Handle the error state or display an error message to the user
     }
+
   }
-  console.log(bert_score)
   setBertScore(bert_score);
 }
 
@@ -203,7 +212,7 @@ async function compute_bert_score(split_output: string[][]): Promise<void> {
 function splitOutput (arr: string[]){
   var o = Array(arr.length);
   for (let i=0; i < arr.length; i++){
-    o[i] = arr[i].split('?').map((entry) => ((entry.trim() === "") ? "" : entry + '?'));
+    o[i] = arr[i].split('?').map((entry) => ((entry && entry.trim() === "") ? "" : entry + '?'));
   }
   return o;
 }
@@ -211,10 +220,9 @@ function splitOutput (arr: string[]){
   return (
     <div className='wrapper'>
       <HeaderComponent/>
-      <header className="App-header"> Multi-step Reasoning Interface </header>
+      <header className="App-header"> Multi-step Reasoning Evaluation Tool </header>
       <div className='App'>
           <div style={{textAlign: 'right'}}>
-            <button id="download-log">Download all Interactions</button><br/>
             <button id="reset" onClick={handleRefresh}>Reset</button>
           </div>
 
@@ -223,7 +231,7 @@ function splitOutput (arr: string[]){
           <SelectQuestionComponent questionAnswer={handleQuestion}/><br/>
 
           <h2>3. Run Model</h2>
-          <div className='TextBox'><p>{"Please note that the first run of a model can take longer as the model has to be loaded first. If you don\'t receive an answer, click \"Run Model\" again."}</p></div>
+          <div className='TextBox'><p>{"Please note that the first run of a model can take longer as the model has to be loaded first. If you don't receive an answer, click \"Run Model\" again."}</p></div>
           <div className='center'>
             <button disabled={!model || !questions} onClick={handleRunModel}>Run Model</button>
           </div><br/>
@@ -243,7 +251,7 @@ function splitOutput (arr: string[]){
                 bert_score = {bertScore}
               /><br/>
 
-              <h2>5. Download results as .csv File</h2>
+              <h2>5. Download results as CSV File</h2>
               <div className='center'>
                 <button onClick={handleDownload}>Download</button>
               </div>
