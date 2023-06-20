@@ -5,7 +5,6 @@ import HeaderComponent from './components/Header';
 import SelectQuestionComponent from './components/SelectQuestion';
 import OutputComponent from './components/Output';
 import LoadingSpinner from './components/LoadingSpinner'
-import exp from 'constants';
 
 const backend = "http://127.0.0.1:8000/models"
 
@@ -18,7 +17,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [bertScore, setBertScore] = useState<number[][]>([[]]);
   var counter = useRef<number>(0);
-  //var csvRows = useRef<string[][]>([[]]);
   const csvRows_dict = useRef<{[key: string]: any}>({});
 
 
@@ -28,7 +26,7 @@ function App() {
 const handleDownload = () => {
   const finalRows = removeDuplicates();
   console.log(finalRows);
-  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + finalRows.map(row => row.join(",")).join("\r\n");
+  const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "expected Subquestions", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + finalRows.map(row => row.join(",")).join("\r\n");
   const encodedUri = encodeURI(csvContent);
   var link = document.createElement("a");
   link.setAttribute("href", encodedUri);
@@ -56,7 +54,7 @@ const removeDuplicates = () => {
     var subquestion = rowArray[2].replace(/,/g, "");
 
     //Structure of output: unique index, model, input question, generated subquestion, true/false, error type, additional comments
-    var row = [counter.current.toString(), model, q, subquestion, ...rowArray.slice(3)];
+    var row = [counter.current.toString(), model, q, subquestion,  ...rowArray.slice(3)];
     counter.current++;
 
     finalRows.push(row)
@@ -161,21 +159,18 @@ async function get_model_output(): Promise<string[][]> {
 async function compute_bert_score(split_output: string[][]): Promise<void> {
   var bert_score = new Array(split_output.length).fill([]);
   for (let i = 0; i < split_output.length; i++) {
-    
-    //making sure they have the same length
-    
-    /*var predictions = split_output[i];
-    var references = expectedAnswer[i].slice(0, split_output[i].length);
-    while (references.length < predictions.length){
-      references.push(references[references.length-1])
-    }*/
-    
     if (expectedAnswer.length === 0 || expectedAnswer[i].length === 0){
       bert_score[i] = new Array(split_output[i].length).fill(0);
     }
     else {
-      var predictions = split_output[i]
-      var references = expectedAnswer[i]
+      //making sure they have the same length
+      var predictions = split_output[i];
+      var references = expectedAnswer[i].slice(0, split_output[i].length);
+      while (references.length < predictions.length){
+        references.push(references[references.length-1])
+      }
+      //var predictions = split_output[i]
+      //var references = expectedAnswer[i]
       try {
         const response = await fetch("http://127.0.0.1:8000/bert_score", {
           method: 'POST',
@@ -212,7 +207,17 @@ async function compute_bert_score(split_output: string[][]): Promise<void> {
 function splitOutput (arr: string[]){
   var o = Array(arr.length);
   for (let i=0; i < arr.length; i++){
-    o[i] = arr[i].split('?').map((entry) => ((entry && entry.trim() === "") ? "" : entry + '?'));
+    o[i] = []
+    console.log("array ", arr[i])
+    const split_arr = arr[i].split('?');
+    console.log(split_arr)
+    for (let entry in split_arr){
+      const trimmed_entry = split_arr[entry].trim();
+      if (trimmed_entry != ""){
+        o[i].push(trimmed_entry + '?');
+      }
+    }
+    //o[i] = arr[i].split('?').map((entry) => ((entry.trim() === "") ? "" : entry + '?'));
   }
   return o;
 }

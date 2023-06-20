@@ -16,7 +16,7 @@ function OutputComponent(props: OutputComponentProp){
   const outputResult= useRef<string[][]>([]);
 
   const handleRowOutput = (outputValue: string[], key: [number, number], subquestion: string, errorText: string) => {
-    var updatedOutput = [...outputResult.current, [key[0].toString()].concat(key[1].toString(), subquestion, outputValue, errorText)];
+    var updatedOutput = [...outputResult.current, [key[0].toString()].concat(key[1].toString(), subquestion, props.expectedAnswer[key[0]].map((string) => string.replace(/,/g, "")).join(" "), outputValue, errorText)];
     
     //have to sort because it happens sometimes that the questions are unsorted
     //PROBABLY CAN REMOVE IT HERE
