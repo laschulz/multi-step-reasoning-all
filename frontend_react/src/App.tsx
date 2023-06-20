@@ -24,8 +24,9 @@ function App() {
 
 //handles the Download when Download button is clicked
 const handleDownload = () => {
+  //csvRows_dict.current = {}
   const finalRows = removeDuplicates();
-  console.log(finalRows);
+  console.log("finalRows", finalRows);
   const csvContent = "data:text/csv;charset=utf-8," + ["Index", "Model", "Question", "generated Subquestion", "expected Subquestions", "True/False", "Error Type (if applicable)"].join(",") + "\r\n" + finalRows.map(row => row.join(",")).join("\r\n");
   const encodedUri = encodeURI(csvContent);
   var link = document.createElement("a");
@@ -36,12 +37,12 @@ const handleDownload = () => {
 }
 
 //removes Duplicates in the csv File called in the handleDownload function
-const removeDuplicates = () => {
+function removeDuplicates(){
   var finalRows = [];
-  console.log("csvRows_dict ", csvRows_dict.current);
-  for (var rowKey in csvRows_dict.current){
+  const sortedKeys = Object.keys(csvRows_dict.current).sort();
+  for (const rowKey of sortedKeys){
+    console.log(rowKey)
     var rowArray = csvRows_dict.current[rowKey];
-    console.log(rowArray);
     //Structure of rowArray: question_index, subquestion_index, true/false, error type, additional comments
     var q_index = rowArray[0];
 
@@ -88,7 +89,6 @@ const parser_expectedAnswer = (expectedAnswer: string[]) => {
     }
     parsed_expectedAnswer[i] = temp; 
   }
-  console.log(parsed_expectedAnswer);
   return parsed_expectedAnswer;
 }
 
@@ -100,8 +100,6 @@ const handleOutput = (outputValue: string[][]) => {
     const question_index = current_row[0];
     const subquestion_index = current_row[1];
     csvRows_dict.current[`${question_index}-${subquestion_index}`] = current_row;
-    console.log(csvRows_dict.current)
-    //csvRows.current.push(outputValue[i])
   }
 }
 
@@ -114,8 +112,8 @@ const handleRefresh = () => {
 //communicate with API
 async function handleRunModel(){
   setIsLoading(true);
+  csvRows_dict.current = {}
   var split_output = await get_model_output();
-  console.log("split_output", split_output);
   await compute_bert_score(split_output);
   setIsLoading(false);
   setShowDiv(true);
@@ -141,7 +139,6 @@ async function get_model_output(): Promise<string[][]> {
 
     const data = await response.json();
     counter.current = 0;
-    console.log("data output: ", data.output)
     const split_output = splitOutput(data.output);
     if (split_output.length > 1) {
       setModelOutput(split_output.slice(1));
@@ -192,7 +189,6 @@ async function compute_bert_score(split_output: string[][]): Promise<void> {
         const data = await response.json();
         const index = data.index;
         bert_score[index] = data.score;
-        console.log("data: " + data);
       } catch (error) {
         console.error(error);
         // Handle the error state or display an error message to the user
@@ -208,16 +204,13 @@ function splitOutput (arr: string[]){
   var o = Array(arr.length);
   for (let i=0; i < arr.length; i++){
     o[i] = []
-    console.log("array ", arr[i])
     const split_arr = arr[i].split('?');
-    console.log(split_arr)
     for (let entry in split_arr){
       const trimmed_entry = split_arr[entry].trim();
       if (trimmed_entry != ""){
         o[i].push(trimmed_entry + '?');
       }
     }
-    //o[i] = arr[i].split('?').map((entry) => ((entry.trim() === "") ? "" : entry + '?'));
   }
   return o;
 }

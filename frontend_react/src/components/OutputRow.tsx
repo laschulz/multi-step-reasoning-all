@@ -49,6 +49,7 @@ function OutputRowComponent(props: OutputComponentProp) {
 
   async function correctOrWrong() {
     const question_stripped = props.subquestion.trim();
+    console.log("question_stripped", question_stripped)
     const expected_stripped = props.expectedAnswer[props.subquestion_index-1].trim();
     var error = {value: 'dummy', label: 'Dummy'}
     if (props.bert_score > 0.995){

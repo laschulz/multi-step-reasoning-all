@@ -27,7 +27,6 @@ function OutputComponent(props: OutputComponentProp){
       return parseInt(a[0]) - parseInt(b[0]);
     });
     props.outputResult(updatedOutput);
-    
     outputResult.current = updatedOutput;
   }
 
