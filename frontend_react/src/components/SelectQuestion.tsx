@@ -54,7 +54,7 @@ function InputCSV(props: InputCSVComponentProp){
         {"Please submit a file that fulfills the following requirements for the model to work properly: "}<br/>
         {"1. The first row is a header row."}<br/>
         {"2. The first column is for the questions."}<br/>
-        {"3. The second column is for the expected answers. This information is optional. The expected answers should be formated such that the expected subquestion is before its calculation."}<br/><br/>
+        {"3. The second column is for the expected answers. This information is optional. The expected answers should be formatted such that the expected sub-question is before its calculation."}<br/><br/>
         {"Do not upload csv Files that exceed 100 rows as this might exceed the possible server load."}
       </div>
     

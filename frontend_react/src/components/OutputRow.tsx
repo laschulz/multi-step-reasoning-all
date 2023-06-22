@@ -12,6 +12,7 @@ const error_classes = [
   { value: 'incorrect_specificity_overemphasis', label: 'Incorrect Specificity Emphasis: Over-Emphasis' },
   { value: 'incorrect_specificity_underemphasis', label: 'Incorrect Specificity Emphasis: Under-Emphasis' },
   { value: 'wrong_order', label: 'Incorrect Ordering of Questions' }, 
+  { value: 'missing_calculation', label: 'Missing Calculation Step' }, 
   { value: 'question_missing', label: 'Missing Relevant Question' },
   { value: 'other_error', label: 'Another Error (please specify)' },
 ];
@@ -59,13 +60,11 @@ function OutputRowComponent(props: OutputComponentProp) {
     } else if (props.bert_score < 0.8925){
       error = await classify_error() // ask ChatGPT for error
     } else { //can't really say anything about the results
-        if (props.bert_score > 0.98) {
+        if (props.bert_score > 0.9670) {
           const matching = await entities_matching();
           const generated_numbers = findNumbers(question_stripped);
           const expected_numbers = findNumbers(expected_stripped);
-          if (matching === true) {
-            error = {"value": 'correct', "label": 'Correct' }
-          }else if (generated_numbers === expected_numbers){
+          if ((matching === true) && (generated_numbers === expected_numbers)){
             error = {"value": 'correct', "label": 'Correct' }
           }else {
             error = await classify_error()
@@ -130,8 +129,9 @@ async function classify_error(): Promise<{ value: string; label: string; }>{
   '5. incorrect specificity emphasis: under-emphasis\n' + 
   '6. incorrect ordering of questions\n' +
   '7. missing relevant question\n' +
-  '8. another error\n' +
-  '9. no big difference\n\n' +
+  '8. missing calculation step\n' +
+  '9. another error\n' +
+  '10. no big difference\n\n' +
   
   'The questions are related to the following multi-step reasoning problem:\n' + props.question_asked + 
   

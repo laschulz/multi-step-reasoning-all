@@ -33,10 +33,9 @@ def create_app():
             output = infer_t5({"inputs": requestedQuestion, 
                             "options": {"wait_for_model": True}
                             })
-            #print(output)
         elif (requestedModel=='Flan-T5-local'):
             output = infer_t5_local(requestedQuestion)
-            #print(output)
+        """""
         elif (requestedModel=='model3'):
             output = gpt_2({"inputs": requestedQuestion, 
                             "parameters": {"max_new_tokens": 100},
@@ -44,7 +43,7 @@ def create_app():
                             })
         elif (requestedModel=='gpt3'):
             output = gpt_3(requestedQuestion)
-        
+        """
         return jsonify({'output': output})
     
     @app.route('/bert_score', methods=['POST', 'GET'])
@@ -71,6 +70,8 @@ def create_app():
         print(entities_pred)
         print(entities_ref)
         if len(entities_pred) == 0 or len(entities_ref) == 0:
+            response = False
+        elif len(entities_pred) != len(entities_ref):
             response = False
         else:
             for i in range(min(len(entities_pred), len(entities_ref))):
@@ -103,9 +104,11 @@ def create_app():
             return { "value": 'wrong_order', "label": 'Incorrect Ordering of Questions' }
         elif (("7" in gpt_response) or ("missing relevant question" in gpt_response)):
             return { "value": 'question_missing', "label": 'Missing Relevant Question' }
-        elif (("8" in gpt_response) or ("another error" in gpt_response)):
+        elif (("8" in gpt_response) or ("missing calculation step" in gpt_response)):
+            return { "value": 'missing_calculation', "label": 'Missing Calculation Step' },
+        elif (("9" in gpt_response) or ("another error" in gpt_response)):
             return { "value": 'other_error', "label": 'Another Error (please specify)' }
-        elif (("9" in gpt_response) or ("no big difference" in gpt_response)):
+        elif (("10" in gpt_response) or ("no big difference" in gpt_response)):
             return  {"value": 'correct', "label": 'Correct' }
         else:
             return 'error'
