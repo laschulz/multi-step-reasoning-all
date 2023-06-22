@@ -83,22 +83,25 @@ def create_app():
     @app.route('/classify_error', methods=['POST', 'GET'])
     def classify_error(): #local right now
         prompt = request.json['prompt']
-        print(prompt)
-        #answer = gpt_3(prompt)
-        answer = "3"
+        #print(prompt)
+        answer = gpt_3(prompt)
+        #answer = "3"
+        print(answer)
         error = define_answer(answer.lower())
         return jsonify({'reply': error})
 
     def define_answer(gpt_response):
-        if (("1" in gpt_response) or ("incomplete question generation" in gpt_response)):
+        if (("9" in gpt_response) or ("no error" in gpt_response) or ("questions is correct" in gpt_response)):
+            return  {"value": 'correct', "label": 'Correct' }
+        elif (("1" in gpt_response) or ("incomplete question generation" in gpt_response) or ("syntax error" in gpt_response)):
             return { "value": 'incomplete_question', "label": 'Incomplete Question Generation' }
-        elif (("2" in gpt_response) or ("irrelevant question generation: asking for already provided information" in gpt_response)):
+        elif (("2" in gpt_response) or ("irrelevant question generation: asking for already provided information" in gpt_response) or ("asking for already provided information" in gpt_response)):
             return { "value": 'information_given', "label": 'Irrelevant Question Generation: Asking for already provided information' }
-        elif (("3" in gpt_response) or ("irrelevant question generation: doesn\’t relate to the expected answer" in gpt_response)):
+        elif (("3" in gpt_response) or ("irrelevant question generation: doesn\’t relate to the expected answer" in gpt_response) or ("doesn\’t relate to the expected answer" in gpt_response)):
             return { "value": 'unnecessary_question', "label": 'Irrelevant Question Generation: Doesn\'t relate to the expected answer' }
-        elif (("4" in gpt_response) or ("incorrect specificity emphasis: over-emphasis" in gpt_response)):
+        elif (("4" in gpt_response) or ("incorrect specificity emphasis: over-emphasis" in gpt_response) or ("over-emphasis" in gpt_response)):
             return { "value": 'incorrect_specificity_overemphasis', "label": 'Incorrect Specificity Emphasis: Over-Emphasis' }
-        elif (("5" in gpt_response) or ("incorrect specificity emphasis: under-emphasis" in gpt_response)):
+        elif (("5" in gpt_response) or ("incorrect specificity emphasis: under-emphasis" in gpt_response) or ("under-emphasis" in gpt_response)):
             return { "value": 'incorrect_specificity_underemphasis', "label": 'Incorrect Specificity Emphasis: Under-Emphasis' }
         elif (("6" in gpt_response) or ("incorrect ordering of questions" in gpt_response)):
             return { "value": 'wrong_order', "label": 'Incorrect Ordering of Questions' }
@@ -106,10 +109,6 @@ def create_app():
             return { "value": 'question_missing', "label": 'Missing Relevant Question' }
         elif (("8" in gpt_response) or ("missing calculation step" in gpt_response)):
             return { "value": 'missing_calculation', "label": 'Missing Calculation Step' },
-        elif (("9" in gpt_response) or ("another error" in gpt_response)):
-            return { "value": 'other_error', "label": 'Another Error (please specify)' }
-        elif (("10" in gpt_response) or ("no big difference" in gpt_response)):
-            return  {"value": 'correct', "label": 'Correct' }
         else:
             return 'error'
 

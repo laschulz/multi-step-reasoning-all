@@ -119,19 +119,20 @@ async function classify_error(): Promise<{ value: string; label: string; }>{
   
   'The questions are:\n' + 
   'Generated: ' + props.subquestion + 
-  '\nExpected: ' + expected_subquestion + 
-  
+  '\nExpected: ' + props.expectedAnswer + 
+
+  '\n\nThe generated question is sub-question ' +  props.subquestion_index + ' of the generated sub-question stream.\n' +
+
   '\n\nYour options are:\n' + 
-  '1. incomplete question generation\n' +
+  '1. incomplete question generation / syntax error: the generated question is incomplete and does not form a grammatically correct sentence\n' +
   '2. irrelevant question generation: asking for already provided information\n' +
   '3. irrelevant question generation: doesn\’t relate to the expected answer\n' +
   '4. incorrect specificity emphasis: over-emphasis\n' +
   '5. incorrect specificity emphasis: under-emphasis\n' + 
-  '6. incorrect ordering of questions\n' +
+  '6. incorrect ordering of questions: the generated question is not in the correct order relative to other questions or steps in the problem-solving process\n' +
   '7. missing relevant question\n' +
   '8. missing calculation step\n' +
-  '9. another error\n' +
-  '10. no big difference\n\n' +
+  '9. no error, questions is correct\n\n' +
   
   'The questions are related to the following multi-step reasoning problem:\n' + props.question_asked + 
   

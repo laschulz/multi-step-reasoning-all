@@ -160,14 +160,15 @@ async function compute_bert_score(split_output: string[][]): Promise<void> {
       bert_score[i] = new Array(split_output[i].length).fill(0);
     }
     else {
-      //making sure they have the same length
+      //making sure they have the same length by adding sub-questions with "nothing"
       var predictions = split_output[i];
-      var references = expectedAnswer[i].slice(0, split_output[i].length);
-      while (references.length < predictions.length){
-        references.push(references[references.length-1])
+      var references = expectedAnswer[i]; //.slice(0, split_output[i].length)
+      while (predictions.length < references.length){
+        predictions.push("nothing")
       }
-      //var predictions = split_output[i]
-      //var references = expectedAnswer[i]
+      while (references.length < predictions.length){
+        references.push("nothing")
+      }
       try {
         const response = await fetch("http://127.0.0.1:8000/bert_score", {
           method: 'POST',
