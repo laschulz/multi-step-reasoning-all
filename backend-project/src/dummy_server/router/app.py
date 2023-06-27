@@ -51,9 +51,7 @@ def create_app():
         bertscore = load("bertscore")
         index = request.json['index']
         predictions = request.json['predictions']
-        print(predictions)
         references = request.json['references']
-        print(references)
         results = bertscore.compute(predictions=predictions, references=references, lang="en")
         return jsonify({'score': results['f1'], 'index': index})
     
@@ -62,13 +60,10 @@ def create_app():
         nlp = en_core_web_sm.load()
         prediction = request.json['prediction']
         reference = request.json['reference']
-        print(prediction)
-        print(reference)
+        print("hi")
         entities_pred = [(entity.text, entity.label_) for entity in nlp(prediction).ents]
         entities_ref = [(entity.text, entity.label_) for entity in nlp(reference).ents]
         response = True
-        print(entities_pred)
-        print(entities_ref)
         if len(entities_pred) == 0 or len(entities_ref) == 0:
             response = False
         elif len(entities_pred) != len(entities_ref):
@@ -83,21 +78,19 @@ def create_app():
     @app.route('/classify_error', methods=['POST', 'GET'])
     def classify_error(): #local right now
         prompt = request.json['prompt']
-        #print(prompt)
         answer = gpt_3(prompt)
-        #answer = "3"
-        print(answer)
+        print(prompt + answer)
         error = define_answer(answer.lower())
         return jsonify({'reply': error})
 
     def define_answer(gpt_response):
-        if (("9" in gpt_response) or ("no error" in gpt_response) or ("questions is correct" in gpt_response)):
+        if (("9" in gpt_response) or ("no error" in gpt_response) or ("question is correct" in gpt_response)):
             return  {"value": 'correct', "label": 'Correct' }
         elif (("1" in gpt_response) or ("incomplete question generation" in gpt_response) or ("syntax error" in gpt_response)):
-            return { "value": 'incomplete_question', "label": 'Incomplete Question Generation' }
-        elif (("2" in gpt_response) or ("irrelevant question generation: asking for already provided information" in gpt_response) or ("asking for already provided information" in gpt_response)):
+            return { "value": 'incomplete_question', "label": 'Incomplete Question Generation / Syntax Error' }
+        elif (("2" in gpt_response) or ("irrelevant question generation: asking for already provided information" in gpt_response) or ("asking for already provided information" in gpt_response) or ("irrelevant question generation - asking for already provided information" in gpt_response)):
             return { "value": 'information_given', "label": 'Irrelevant Question Generation: Asking for already provided information' }
-        elif (("3" in gpt_response) or ("irrelevant question generation: doesn\’t relate to the expected answer" in gpt_response) or ("doesn\’t relate to the expected answer" in gpt_response)):
+        elif (("3" in gpt_response) or ("irrelevant question generation: doesn\’t relate to the expected answer" in gpt_response) or ("doesn\’t relate to the expected answer" in gpt_response) or ("irrelevant question generation - doesn\’t relate to the expected answer" in gpt_response) or ("expected answer" in gpt_response)):
             return { "value": 'unnecessary_question', "label": 'Irrelevant Question Generation: Doesn\'t relate to the expected answer' }
         elif (("4" in gpt_response) or ("incorrect specificity emphasis: over-emphasis" in gpt_response) or ("over-emphasis" in gpt_response)):
             return { "value": 'incorrect_specificity_overemphasis', "label": 'Incorrect Specificity Emphasis: Over-Emphasis' }
@@ -110,7 +103,7 @@ def create_app():
         elif (("8" in gpt_response) or ("missing calculation step" in gpt_response)):
             return { "value": 'missing_calculation', "label": 'Missing Calculation Step' },
         else:
-            return 'error'
+            return  {"value": 'correct', "label": 'Correct' }
 
     return app
 

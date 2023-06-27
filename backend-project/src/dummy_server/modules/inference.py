@@ -41,8 +41,8 @@ def infer_t5_local(input_array):
         do_sample=False,  # disable sampling to test if batching affects output
     )
     return tokenizer.batch_decode(output_sequence, skip_special_tokens=True)
-#end 
 
+#not used
 def gpt_3(input):
     openai.api_key = API_TOKEN_OPENAI3
 

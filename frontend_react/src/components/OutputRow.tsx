@@ -6,7 +6,7 @@ import correct from '../correct_symbol.png';
 import wrong from '../wrong_symbol.png';
 
 const error_classes = [
-  { value: 'incomplete_question', label: 'Incomplete Question Generation' },
+  { value: 'incomplete_question', label: 'Incomplete Question Generation / Syntax Error' },
   { value: 'information_given', label: 'Irrelevant Question Generation: Asking for already provided information' },
   { value: 'unnecessary_question', label: 'Irrelevant Question Generation: Doesn\'t relate to the expected answer' }, 
   { value: 'incorrect_specificity_overemphasis', label: 'Incorrect Specificity Emphasis: Over-Emphasis' },
@@ -132,7 +132,7 @@ async function classify_error(): Promise<{ value: string; label: string; }>{
   '6. incorrect ordering of questions: the generated question is not in the correct order relative to other questions or steps in the problem-solving process\n' +
   '7. missing relevant question\n' +
   '8. missing calculation step\n' +
-  '9. no error, questions is correct\n\n' +
+  '9. no error, question is correct\n\n' +
   
   'The questions are related to the following multi-step reasoning problem:\n' + props.question_asked + 
   

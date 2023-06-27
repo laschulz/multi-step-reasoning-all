@@ -230,7 +230,6 @@ function splitOutput (arr: string[]){
           <SelectQuestionComponent questionAnswer={handleQuestion}/><br/>
 
           <h2>3. Run Model</h2>
-          <div className='TextBox'><p>{"Please note that the first run of a model can take longer as the model has to be loaded first. If you don't receive an answer, click \"Run Model\" again."}</p></div>
           <div className='center'>
             <button disabled={!model || !questions} onClick={handleRunModel}>Run Model</button>
           </div><br/>
