@@ -84,7 +84,7 @@ def create_app():
         return jsonify({'reply': error})
 
     def define_answer(gpt_response):
-        if (("9" in gpt_response) or ("no error" in gpt_response) or ("question is correct" in gpt_response)):
+        if (("8" in gpt_response) or ("no error" in gpt_response) or ("question is correct" in gpt_response)):
             return  {"value": 'correct', "label": 'Correct' }
         elif (("1" in gpt_response) or ("incomplete question generation" in gpt_response) or ("syntax error" in gpt_response)):
             return { "value": 'incomplete_question', "label": 'Incomplete Question Generation / Syntax Error' }
@@ -98,9 +98,7 @@ def create_app():
             return { "value": 'incorrect_specificity_underemphasis', "label": 'Incorrect Specificity Emphasis: Under-Emphasis' }
         elif (("6" in gpt_response) or ("incorrect ordering of questions" in gpt_response)):
             return { "value": 'wrong_order', "label": 'Incorrect Ordering of Questions' }
-        elif (("7" in gpt_response) or ("missing relevant question" in gpt_response)):
-            return { "value": 'question_missing', "label": 'Missing Relevant Question' }
-        elif (("8" in gpt_response) or ("missing calculation step" in gpt_response)):
+        elif (("7" in gpt_response) or ("missing calculation step" in gpt_response)):
             return { "value": 'missing_calculation', "label": 'Missing Calculation Step' },
         else:
             return  {"value": 'correct', "label": 'Correct' }
