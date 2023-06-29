@@ -34,7 +34,7 @@ function OutputComponent(props: OutputComponentProp){
   for (let i = 0; i < props.numberQuestions; i++) {
     if (typeof(props.backendResponse[i]) !== 'undefined') { 
       for (let j = 0; j < props.backendResponse[i].length; j++){
-        if ((props.backendResponse[i][j] === "") || (props.backendResponse[i][j] === "nothing" )){
+        if (props.backendResponse[i][j] === ""){
           continue;
         }
         rows.push(

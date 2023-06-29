@@ -53,7 +53,10 @@ function OutputRowComponent(props: OutputComponentProp) {
     console.log("question_stripped", question_stripped)
     const expected_stripped = props.expectedAnswer[props.subquestion_index-1].trim();
     var error = {value: 'dummy', label: 'Dummy'}
-    if (props.bert_score > 0.995){
+    if(props.subquestion === "nothing"){
+      error = { value: 'question_missing', label: 'Missing Relevant Question' }
+    }
+    else if (props.bert_score > 0.995){
       error = {value: 'correct', label: 'Correct' }
     } else if ((question_stripped.split(/\s+/).length < 5) || (expected_stripped.startsWith(question_stripped.slice(0, -1)))){
       error = { value: 'incomplete_question', label: 'Incomplete Question Generation' }
