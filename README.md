@@ -5,6 +5,9 @@
 The Multi-Step Reasoning Evaluation Tool was created as part of the Bachelor's Thesis of Laura Schulz for the BSc Computer Science at ETH. It 
 was developed to facilitate efficient error analysis. This online tool allows users to categorize and annotate errors on the fly. Additionally, it auto-evaluates the output of the model to assist the user or even replace a manual inspection. This tool will enable researchers to better understand the multi-step reasoning abilities of the LLMs and gather data to improve these models in the future. 
 
+A detailed approach and the results can be found in the [Bachelor Thesis](./FINAL-Analysis_error_types_for_multi_step_reasoning_capabilities_of_LLMs.pdf)
+
+
 
 ### Datasets
 GSM8K Dataset: https://github.com/openai/grade-school-math
